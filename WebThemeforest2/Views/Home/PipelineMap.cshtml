@@ -1,0 +1,1777 @@
+﻿@{
+    ViewBag.Title = "PipileneMap";
+}
+
+
+<style>
+    body {
+        margin: 50px auto;
+    }
+
+    path {
+        stroke: #fff;
+    }
+
+        path:hover {
+            opacity: 0.9;
+        }
+
+    rect:hover {
+        fill: blue;
+    }
+
+    .axis {
+        font: 8px sans-serif;
+    }
+
+    .legend tr {
+        border-bottom: 1px solid grey;
+    }
+
+        .legend tr:first-child {
+            border-top: 1px solid grey;
+        }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .x.axis path {
+        display: none;
+    }
+
+    .legend {
+        margin-bottom: 50px;
+        display: inline-block;
+        border-collapse: collapse;
+        border-spacing: 0px;
+    }
+
+        .legend td {
+            padding: 4px 5px;
+            vertical-align: bottom;
+        }
+
+    .legendFreq, .legendPerc {
+        align: right;
+        width: 50px;
+    }
+
+    .Calculating {
+        background-image: url('http://www.fotos-lienzo.es/media/aw_searchautocomplete/default/loading.gif');
+        background-repeat: no-repeat;
+    }
+
+        .Calculating:after {
+            content: "Calculating route...";
+            text-align: right;
+            padding-left: 25px;
+        }
+
+    .Estimating {
+        background-image: url('http://www.fotos-lienzo.es/media/aw_searchautocomplete/default/loading.gif');
+        background-repeat: no-repeat;
+    }
+
+        .Estimating:after {
+            content: "Estimating Diameter...";
+            text-align: right;
+            padding-left: 25px;
+        }
+
+
+    .pie-legend ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .pie-legend span {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        margin-right: 5px;
+        margin-left: 10px;
+        margin-bottom: -2px;
+    }
+
+    .span {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        margin-right: 5px;
+        margin-bottom: -2px;
+    }
+
+    }
+
+    .pie-legend li {
+        margin-bottom: 10px;
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    .table {
+        border: 1px solid red;
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .cell {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    .tableCustom {
+        display: table;
+    }
+
+    .tableTitle {
+        display: table-caption;
+        padding-bottom: 5px;
+    }
+
+    .tableRow {
+        display: table-row;
+    }
+
+    .tableCell {
+        display: table-cell;
+        padding: 0 5px;
+    }
+
+    .tableRow:nth-child(odd) {
+        background-color: rgb(190, 190, 190);
+        color: rgb(255, 255, 255);
+    }
+
+
+    #floating-panel {
+        position: absolute;
+        top: 50px;
+        left: 5%;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+        text-align: center;
+        font-family: 'Roboto','sans-serif';
+        line-height: 8px;
+        padding-left: 10px;
+    }
+
+
+    #floating-panel2 {
+        position: absolute;
+        top: 100px;
+        left: 5%;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+        text-align: center;
+        font-family: 'Roboto','sans-serif';
+        line-height: 8px;
+        padding-left: 10px;
+    }
+
+    #floating-checkbox {
+        position: absolute;
+        top: 150px;
+        left: 5%;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+        text-align: center;
+        font-family: 'Roboto','sans-serif';
+        line-height: 8px;
+        padding-left: 10px;
+    }
+
+    #show_calculate {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        text-align: right;
+        background: url('http://www.fotos-lienzo.es/media/aw_searchautocomplete/default/loading.gif');
+    }
+
+
+    #show_map_canvas {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        text-align: right;
+        background: url("https://www.creditmutuel.fr/cmne/fr/banques/webservices/nswr/images/loading.gif") no-repeat center center rgba(0,0,0,0.25);
+    }
+</style>
+
+  @{
+    if (HttpContext.Current.Session["userRole"] != null)
+    {
+
+        ViewBag.role = HttpContext.Current.Session["userName"].ToString();
+    }
+
+    string strBag = "";
+    if (HttpContext.Current.Session["userRole"] != null)
+    {
+        if (HttpContext.Current.Session["userRole"].ToString() == "nimouser")
+        {
+            ViewBag.hide = "none";
+        }
+        else
+        {
+            ViewBag.hide = "";
+        }
+    }
+    else { ViewBag.hide = ""; }
+
+}
+<html>
+<head>
+
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title></title>
+
+    <link href="@Url.Content("~/Scripts")/PipelineDataTable/datatables.min.css" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Scripts")/PipelineDataTable/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Scripts")/PipelineDataTable/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+
+    @*<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.16/datatables.min.css" />
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" />
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.4.2/css/buttons.dataTables.min.css">*@
+
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js" type="text/javascript"></script>
+
+    @*for side bar*@
+    <!-- Leaflet Styles -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css"
+          integrity="sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw=="
+          crossorigin="" />
+
+    <!-- Leaflet Libraryi -->
+    <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+            integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+            crossorigin="">
+    </script>
+    <script src="@Url.Content("~/Scripts")/scripts/leaflet.zoomdisplay-src.js"></script>
+
+
+
+    <!-- Get google API Key -->
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCS6bdUDAE60MLhNmzIryBwABVZaLnd6e8" async defer></script> -->
+    <!-- Load google leaflet plugin -->
+    <script src="https://unpkg.com/leaflet.gridlayer.googlemutant@latest/Leaflet.GoogleMutant.js"></script>
+
+    <!-- Load jquery plugin -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link href="@Url.Content("~/Scripts")/css/heatmapControl.css" rel="stylesheet" />
+    <link href="@Url.Content("~/Scripts")/css/leaflet-sidebar.css" rel="stylesheet" />
+    <link href="@Url.Content("~/Scripts")/css/leaflet-slider.css" rel="stylesheet" />
+    <link href="@Url.Content("~/Scripts")/css/leaflet.zoomdisplay.css" rel="stylesheet" />
+    <link href="@Url.Content("~/Scripts")/css/overview.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+    <!-- BEGIN CONTENT BODY -->
+    <input type="text" id="create_user_by" value="@ViewBag.role" style="display:none" />
+
+    <div class="row" style="height:100%;margin-left:-20px;margin-right:-20px;">
+        <div class="col-lg-8 col-xs-6 col-sm-6" style="/*background-color:aliceblue;*/padding:15px;height:100%;">
+            <div id="show_map_canvas" style="display:none"></div>
+            <div id="show_calculate" style="display:none"></div>
+            <div id="sidebar" class="sidebar collapsed" style="height:77vh; margin-top:2%">
+                <!-- Nav tabs -->
+                <div class="sidebar-tabs">
+                    <ul role="tablist">
+                        <li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li>
+                    </ul>
+                </div>
+
+                <!-- Tab panes -->
+                <div class="sidebar-content">
+                    <div class="sidebar-pane" id="settings">
+                        <h1 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+                        <br>
+
+                        <div class="tableCustom" style="width:100%;">
+                            <div class="tableRow" style="background-color:#FFFFFF; margin-top:10px">
+                                <div class="tableCell" style="color: #2F353B"><strong>Setting Choice</strong></div>
+                                <div class="tableCell" style="color: #2F353B">
+                                    <select id="start" onchange="javascript: initialize(this.value);">
+                                        <option value="Automatic" selected>
+                                            Automatic
+                                        </option>
+                                        <option value="Manual">Manual</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="tableRow" style="background-color:#FFFFFF; margin-top:10Px">
+                                <div class="tableCell" style="color: #2F353B"><strong>Category</strong></div>
+                                <div class="tableCell" style="color: #2F353B">
+                                    <select id='ddlCategory'><option value="Select">Select Category</option></select>
+                                </div>
+                            </div>
+                            <br />
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div id="map_canvas" style="width: 95%; left:5%; background-color:#EEEEEE; height: 77vh;"></div>
+            <div style="margin-left:5%; margin-top:1%">
+                <button id="dlt" type="button" class="btn red delete" onclick="deleteMarkers();"><i class="fa fa-trash"></i><span> Delete </span></button>
+                <button id="prt" type="button" onclick="capture()" class="btn btn-primary"><i class="fa fa-print"></i> Print </button>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#myModal" style="display:@ViewBag.hide;"> <i class="fa fa-download "></i>   View History </button>
+                <button id="btnCM" type="button" class="btn btn-primary" onclick="formPopUp()"> Calculate Manual</button>
+               
+            </div>
+        </div>
+        <div class="col-lg-4 col-xs-6 col-sm-6" style="background-color:#FFFFFF;height:100%;">
+            <div class="page-toolbar">
+
+                <div class="row"></div>
+                <div class="row">
+
+                    <div style="border-bottom:1px solid #808080 ; ">
+                        <i class="icon-note "></i><strong>AVAILABLE CAPACITY</strong>
+                    </div>
+
+
+                    <div class="cell">
+                        <canvas id="top10ItemsChart" class="pie" height="120" width="120"></canvas>
+                    </div>
+                    <div class="cell" id="top10Legend" style="margin-left:200px"></div>
+
+                </div>
+                <div class="row">
+                    <div class="panel-primary" style="margin-bottom:0px;">
+
+                        <div style="border-bottom:1px solid #808080; ">
+                            <i class="icon-note "></i> <strong>PIPELINE DATA</strong>
+                        </div>
+
+                        <div class="panel-body">
+                            <div class="well well-sm" style="background-color: #FFFFFF;">
+                                <div style="border-bottom: 1px solid #808080; "><i class="icon-note "></i><strong>Source</strong></div>
+                                <div class="tableCustom" style="width:100%;">
+                                    <div class="tableRow" style="background-color:#FFFFFF">
+                                        <div class="tableCell" style="color: #2F353B"><strong>Diameter</strong></div>
+                                        <div class="tableCell" style="color: #2F353B">:</div>
+                                        <div class="tableCell" style="color: #2F353B"><output id="txt_Diameter" style="font-size:13px; margin-top: 0"></output></div>
+                                        <div class="tableCell" style="color: #2F353B">In</div>
+                                    </div>
+
+                                    <div class="tableRow" style="background-color:#FFFFFF">
+                                        <div class="tableCell" style="background-color:#FFFFFF"><strong>Pressure</strong></div>
+                                        <div class="tableCell" style="color: #2F353B">:</div>
+                                        <div class="tableCell" style="color: #2F353B"><output id="txt_Presure" style="font-size:13px;padding-bottom: 0px"></output></div>
+
+                                        <div class="tableCell" style="color: #2F353B">barg (max/min)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom:0px;">
+                                <img src="@Url.Content("~/Content/Themeforest")/assets/layouts/layout/img/garis-pipeline-lurus-rev02.png" style="width:100%;" />
+                            </div>
+                            <div class="well well-sm" style="margin-top: 10px; background-color: #FFFFFF;">
+                                <div style="border-bottom:1px solid #808080; "><i class="icon-note "></i><strong>Planned Pipeline</strong></div>
+                                <div class="tableCustom" style="width:100%;">
+                                    <div class="tableRow" style="background-color:#FFFFFF">
+                                        <div class="tableCell" style="color: #2F353B"><strong>Diameter Estimate</strong></div>
+                                        <div class="tableCell" style="color: #2F353B">:</div>
+                                        <div class="tableCell" style="color: #2F353B"><output id="textdiameter" style="font-size:13px;"></output></div>
+                                        <div class="tableCell" style="color: #2F353B">In</div>
+                                    </div>
+                                    <div class="tableRow" style="background-color:#FFFFFF">
+                                        <div class="tableCell" style="color: #2F353B"><strong>Nominal Pipe Size</strong></div>
+                                        <div class="tableCell" style="color: #2F353B">:</div>
+                                        <div class="tableCell" style="color: #2F353B"><output id="txt_diameter_max" style="font-size:13px;"></output></div>
+                                        @*<div class="tableCell" style="color: #2F353B">In</div>*@
+                                    </div>
+                                    <div class="tableRow" style="background-color:#FFFFFF">
+                                        <div class="tableCell" style="color: #2F353B"><strong>Pressure</strong></div>
+                                        <div class="tableCell" style="color: #2F353B">:</div>
+                                        <div class="tableCell" style="color: #2F353B"><output id="textpresure" style="font-size:13px;"></output></div>
+                                        <div class="tableCell" style="color: #2F353B">barg (max)</div>
+                                    </div>
+                                    <div class="tableRow" style="background-color:#FFFFFF">
+                                        <div class="tableCell" style="color: #2F353B"><strong>Length</strong></div>
+                                        <div class="tableCell" style="color: #2F353B">:</div>
+                                        <div class="tableCell" style="color: #2F353B"><output id="txt_length" style="font-size:13px;"></output></div>
+                                        <div class="tableCell" style="color: #2F353B">meters</div>
+                                    </div>
+                                    <div class="tableRow" style="background-color:#FFFFFF">
+                                        <div class="tableCell" style="color: #2F353B"><strong>Cost</strong></div>
+                                        <div class="tableCell" style="color: #2F353B">:</div>
+                                        <div class="tableCell" style="color: #2F353B"><output id="txt_Cost" style="font-size:13px;"></output></div>
+                                        <div class="tableCell" style="color: #2F353B">(Estimated)</div>
+                                    </div>
+                                    @*<div class="tableRow" style="background-color:#FFFFFF">
+                                            <div class="tableCell" style="color: #2F353B"><strong>NPV</strong></div>
+                                            <div class="tableCell" style="color: #2F353B">:</div>
+                                            <div class="tableCell" style="color: #2F353B"><output id="txt_NPV" style="font-size:13px;"></output></div>
+
+                                        </div>
+                                        <div class="tableRow" style="background-color:#FFFFFF">
+                                            <div class="tableCell" style="color: #2F353B"><strong>IRR</strong></div>
+                                            <div class="tableCell" style="color: #2F353B">:</div>
+                                            <div class="tableCell" style="color: #2F353B"><output id="txt_IRR" style="font-size:13px;"></output></div>
+                                            <div class="tableCell" style="color: #2F353B">(%)</div>
+                                        </div>*@
+                                </div>
+
+
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-body">
+                    <div class="portlet box green" style="width:1200px; margin-left:-300px">
+                        <div class="portlet-title">
+                            <div class="caption">
+                                <i class="fa fa-globe"></i>History
+                            </div>
+                            <div class="tools"> </div>
+                        </div>
+                        <div class="portlet-body">
+                            <table class="table table-striped table-bordered table-hover" id="tblHistory" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Source Diameter</th>
+                                        <th>Source Pressure</th>
+                                        <th>Flowrate Input</th>
+                                        <th>Pressure Input</th>
+                                        <th>Estimated Diameter</th>
+                                        <th>Estimated Length</th>
+                                        <th>Estimated Cost</th>
+                                        <th>Lat </th>
+                                        <th>Lng </th>
+                                        <th>Customer </th>
+                                        <th>Created Date</th>
+                                        <th>Created By</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+
+                            <div class="modal-footer">
+
+                                <button type="button" data-dismiss="modal" class="btn green">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END EXAMPLE TABLE PORTLET-->
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script src="@Url.Content("~/Scripts")/GeoJSON.js" type="text/javascript"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&key=AIzaSyAG1GiD6Z-cxmU7ymECJ1hn1cHfBRuY2XY"></script>
+
+    <script src="@Url.Content("~/Scripts")/Chart.js" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts")/html2canvas.min.js" type="text/javascript"></script>
+
+    <script src="@Url.Content("~/Scripts")/Accounting/accounting.min.js" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts")/Accounting/accounting.js" type="text/javascript"></script>
+
+    @*<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.16/datatables.min.js"></script>
+        <script src="//cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/1.4.2/js/dataTables.buttons.min.js" type="text/javascript"></script>
+        <script src="//cdn.datatables.net/buttons/1.4.2/js/buttons.flash.min.js" type="text/javascript"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js" type="text/javascript"></script>
+        <script src="///cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/pdfmake.min.js" type="text/javascript"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/vfs_fonts.js" type="text/javascript"></script>
+        <script src="//cdn.datatables.net/buttons/1.4.2/js/buttons.html5.min.js" type="text/javascript"></script>
+        <script src="//cdn.datatables.net/buttons/1.4.2/js/buttons.print.min.js" type="text/javascript"></script>*@
+
+    <script src="@Url.Content("~/Scripts")/PipelineDataTable/datatables.min.js" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts")/PipelineDataTable/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts")/PipelineDataTable/dataTables.buttons.min.js" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts")/PipelineDataTable/buttons.flash.min.js" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts")/PipelineDataTable/jszip.min.js" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts")/PipelineDataTable/pdfmake.min.js" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts")/PipelineDataTable/vfs_fonts.js" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts")/PipelineDataTable/buttons.html5.min.js" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts")/PipelineDataTable/buttons.print.min.js" type="text/javascript"></script>
+
+    <script src="@Url.Content("~/Scripts")/scripts/geostats.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/classybrew.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/heatmap.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/leaflet-heatmap.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/heatmapControl.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/leaflet-sidebar.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/leaflet-slider.js"></script>
+
+
+
+    <script>
+        //function getDataHistory () {
+        var tablehistory;
+
+
+        tablehistory = $('#tblHistory').DataTable({
+
+            "iDisplayLength": 5,
+            "bStateSave": true,
+            //"destroy": true,
+            "aLengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+            "ajax": {
+                "url": url_api_add_calculate,
+                "dataSrc": ''
+            },
+            "columns": [
+
+
+                {
+                    "data": null, "className": "Area", render: function (item, type, row) {
+                        return "<span>" + item.SOURCE_DIAMETER + "</span>" +
+                            "<input type='text' value='" + item.SOURCE_DIAMETER + "' style='display:none' />";
+                    }
+                },
+                {
+                    "data": null, "className": "Name", render: function (item, type, row) {
+                        return "<span>" + item.SOURCE_PRESSURE + "</span>" +
+                            "<input type='text' value='" + item.SOURCE_PRESSURE + "' style='display:none' />";
+                    }
+                },
+                {
+                    "data": null, "className": "FI", render: function (item, type, row) {
+                        return "<span>" + item.FLOWRATE_INPUT + "</span>" +
+                            "<input type='text' value='" + item.FLOWRATE_INPUT + "' style='display:none' />";
+
+
+                    }
+                },
+                {
+                    "data": null, "className": "SP", render: function (item, type, row) {
+                        return "<span>" + item.PRESSURE_INPUT + "</span>" +
+                            "<input type='text' value='" + item.PRESSURE_INPUT + "' style='display:none' />";
+
+
+                    }
+                },
+                {
+                    "data": null, "className": "CapacityMax", render: function (item, type, row) {
+                        return "<span>" + item.ESTIMATED_DIAMETER + "</span>" +
+                            "<input type='text' value='" + item.ESTIMATED_DIAMETER + "' style='display:none' />";
+                    }
+                },
+
+                {
+                    "data": null, "className": "ED", render: function (item, type, row) {
+                        return "<span>" + item.ESTIMATED_LENGTH + "</span>" +
+                            "<input type='text' value='" + item.ESTIMATED_LENGTH + "' style='display:none' />";
+                        ;
+                    }
+                },
+
+                {
+                    "data": null, "className": "EC", render: function (item, type, row) {
+                        return "<span>" + item.ESTIMATED_COST + "</span>" +
+                            "<input type='text' value='" + item.ESTIMATED_COST + "' style='display:none' />";
+
+                    }
+                },
+
+
+
+                {
+                    "data": null, "className": "LT", render: function (item, type, row) {
+                        return "<span>" + item.LAT + "</span>" +
+                            "<input type='text' value='" + item.LAT + "' style='display:none' />";
+
+                    }
+                },
+
+                {
+                    "data": null, "className": "LG", render: function (item, type, row) {
+                        return "<span>" + item.LNG + "</span>" +
+                            "<input type='text' value='" + item.LNG + "' style='display:none' />";
+
+                    }
+                },
+                {
+                    "data": null, "className": "C", render: function (item, type, row) {
+                        return "<span>" + item.CUSTOMER + "</span>" +
+                            "<input type='text' value='" + item.CUSTOMER + "' style='display:none' />";
+
+                    }
+                },
+
+                {
+                    "data": null, "className": "CD", render: function (item, type, row) {
+                        return "<span>" + item.CREATED_DATE + "</span>" +
+                            "<input type='text' value='" + item.CREATED_DATE + "' style='display:none' />";
+
+                    }
+                },
+
+                {
+                    "data": null, "className": "CB", render: function (item, type, row) {
+                        return "<span>" + item.CREATED_BY + "</span>" +
+                            "<input type='text' value='" + item.CREATED_BY + "' style='display:none' />";
+
+                    }
+                },
+
+            ],
+            "createdRow": function (row, data, index) {
+                $('td', row).eq(0).addClass("hidetd");
+
+            },
+            dom: 'lBfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'print'
+            ]
+
+
+        });
+
+
+    </script>
+
+    <script>
+        var map;
+        var poly;
+        var polyline = [];
+		var path;
+        var ren, ser;
+        var data = {};
+        var data2 = {};
+        var marker;
+        var doMark = true;
+        var directionsDisplay;
+        var wayA;
+        var wayB;
+        var latitude = -6.378938;
+        var longitude = 107.374715;
+        var myLocation = {
+            'latitude': -6.378938,
+            'longitude': 107.374715,
+            'url': '@Url.Content("~/Scripts")/KarawangFacilities.js'
+
+        };
+        var PipeKarawangP2 = {
+            'latitude': -6.378938,
+            'longitude': 107.374715,
+            'url': '@Url.Content("~/Scripts")/nodeKarawang_p2.js',
+        };
+
+
+		   var PipeRD1 = {
+            'latitude': -6.2087634,
+            'longitude': 106.845599,
+            'url': '@Url.Content("~/Scripts")/Jakarta-Industri.js',
+        };
+
+
+
+		var PipeRD2 = {
+            'latitude': -7.275973,
+            'longitude': 112.808304,
+            'url': '@Url.Content("~/Scripts")/RD2-Industri.js',
+        };
+
+        var PipeKarawangP3 = {
+            'latitude': -6.378938,
+            'longitude': 107.374715,
+            'url': '@Url.Content("~/Scripts")/nodeKarawang_p2.js',
+        };
+
+
+        var PipeRD1DTTT = {
+            'latitude': -6.378938,
+            'longitude': 107.374715,
+            'url': '@Url.Content("~/Scripts")/PipeRD1DTTT.js',
+        };
+        var urlarea = '@Url.Content("~/Scripts")/';
+
+        var markers = [];
+        var markers2 = [];
+        var direction;
+        var position;
+        var positionLat;
+        var positionLng;
+        var minDistance;
+        var point;
+        var pointManual;
+        var point0;
+        var infowindow = new google.maps.InfoWindow();
+        var infowindowCM = new google.maps.InfoWindow();
+        ////var formStr = "<legend>Input:</legend>  Presure:<br><input type='text' id='txtPressure'> Barg <br>Flow Rate: <br> <input type='text' id='txtFlowRate'> MMSCFD<br>Category:<br><select id='ddlCategory'></select><br>Name:<br><input type='text' id='txtName'> <br> Construction Type :<br><input type='text' id='txtDescription'  readonly> <br> <br> <div class='Calculat'></div>  <div class='Estimat'></div>  <input type='button'   id='button' value='Submit'   onclick='Validator();' /></form>"
+        //var formStr = "<legend>Input:</legend>  Presure:<br><input type='text' id='txtPressure'> Barg <br>Flow Rate: <br> <input type='text' id='txtFlowRate'> MMSCFD<br>Category:<br><select id='ddlCategory'></select><br>Name:<br><input type='text' id='txtName'> <br> Area:<br><select id='ddlAreaPipeline'></select><br> <br> <br> <div class='Calculat'></div>  <div class='Estimat'></div>  <input type='button'   id='button' value='Submit'   onclick='Validator();' /></form>"
+        var formStr = "<legend>Input:</legend>  Presure:<br><input type='text' id='txtPressure'> Barg <br>Flow Rate: <br> <input type='text' id='txtFlowRate'> MMSCFD<br>Category:<br><input type='text' id='txtCategory' readonly><br>Name:<br><input type='text' id='txtName'> <br> <br> <br> <div class='Calculat'></div>  <div class='Estimat'></div>  <input type='button'   id='button' value='Submit'   onclick='Calculate();' /></form>"
+        //var formStrCalculate = "<legend>Input:</legend>  Presure:<br><input type='text' id='txtPressureInput'> Barg <br>Flow Rate: <br> <input type='text' id='txtFlowRateInput'> MMSCFD<br>Category:<br><select id='ddlCategory'></select><br>Name:<br><input type='text' id='txtNameInput'> <br>Construction Type :<br><input type='text' id='txtDescription' readonly><br><br> <div class='Calculat'></div>  <div class='Estimat'></div>  <input type='button'   id='buttonCM' value='Submit'   onclick='Validator2();' />"
+        var formStrCalculate = "<legend>Input:</legend>  Presure:<br><input type='text' id='txtPressureInput'> Barg <br>Flow Rate: <br> <input type='text' id='txtFlowRateInput'> MMSCFD<br>Category:<br><input type='text' id='txtCategory' readonly><br>Name:<br><input type='text' id='txtNameInput'> <br><br><br> <div class='Calculat'></div>  <div class='Estimat'></div>  <input type='button'   id='buttonCM' value='Submit'   onclick='Validator2();' />"
+        //var formStrCalculate = "<legend>Input:</legend>  Presure:<br><input type='text' id='txtPressureInput'> Barg <br>Flow Rate: <br> <input type='text' id='txtFlowRateInput'> MMSCFD<br>Category:<br><select id='ddlCategory'></select><br>Name:<br><input type='text' id='txtNameInput'> <br>Area:<br><select id='ddlAreaPipeline'></select><br><br> <div class='Calculat'></div>  <div class='Estimat'></div>  <input type='button'   id='buttonCM' value='Submit'   onclick='Validator2();' />"
+        var pipeMax;
+        var txtPresure;
+        var txtremaining;
+        var d;
+        var pipeName;
+        var pipePresure;
+        var pipeFlowRate;
+        var pipeInsideDiameter;
+        var trafficLayer;
+        var p1;
+        var p2;
+        var Tav ;
+        var Q;
+        var L;
+        var txlocation;
+        var txtremaining;
+        var cost;
+        var Lat;
+        var Lng;
+        var cre_date;
+        var cre_by;
+        var diameter_estimate = [];
+        var diameter_max;
+        var diameter;
+        var distance;
+        var data_range = [];
+        var NominalPipeSize;
+        var pMin;
+        var polyOptions;
+        var way1;
+        var way2;
+        var markerLat;
+        var markerLng ;
+        var kmlength;
+        var PressureInputManual ;
+        var FlowrateInputManual ;
+        var CategoryInputManual ;
+        var CustomerNameInputManual;
+        var UpdateLength;
+        var pipePresureMax;
+        var pipePresureMin;
+        var pipeFlowRate ;
+        var pipeInsideDiameter;
+        var pipeNameSource;
+        var LengthInMeters;
+        var pipeFlowRateSource;
+        var pipeRoughness;
+        var idConstruction ;
+        var PressureInput ;
+        var FlowrateInput;
+        var Description = "Dinas";
+        var Category ;
+        var Customer ;
+        var categoryPressure = 1;
+        var categoryPressureName = "DTET";
+		var pressureMinimal = 0.1;
+		var pressureMaximal = 20;
+		var areaPipeline = "Karawang-Industri";
+        var regime;
+        var filename = "KarawangFacilities.js";
+		var dataCategory = [];
+
+        var data_layer;
+        var data_layer_1 ;
+        var data_layer_2 ;
+		 var data_layer_3  ;
+        var data_layer_4 ;
+
+
+        var CustumerCategory ;
+
+        var PipeKarawang0  = [];
+
+		var PipeKarawang1 = [];
+
+		var PipeKarawang2 = [];
+
+		var pipeKar;
+
+		var pipeKar2 = [];
+
+        var PipeRD1;
+
+        var PipeRD2;
+
+        var ddlmap = "Automatic";
+        var unit;
+
+       
+        $.ajax({
+            url: url_api_calculator_category,
+            datatype: "JSON",
+            type: "Get",
+            success: function (data) {
+
+                $.each(data, function (i, item) {
+                    $('#ddlCategory').append($('<option>', {
+                        value: item.ID,
+                        text: item.CATEGORY
+
+                    }));
+
+                });
+
+
+            }
+        });
+
+
+        $("#ddlCategory").change(function () {
+            Category = $('#ddlCategory option:selected').text();
+           
+           
+            data_layer.setMap(null);
+            data_layer_1.setMap(null);
+            $('#show_map_canvas').show();
+            setTimeout(function () {
+                $('#show_map_canvas').hide();
+            if (Category == "Industri") {
+
+                var urlPipeLine = url_api_industri+Category;
+
+               
+                data_layer.setMap(map);
+                data_layer.loadGeoJson(urlPipeLine);
+               
+                var tes = urlPipeLine;
+
+                console.log(tes);
+
+                data_layer.setStyle({
+                    strokeColor: 'red',
+                    strokeWeight: 2
+                });
+                
+                
+
+            } else if (Category == "Rumah Tangga") {
+
+                var urlPipeLineRT = url_api_RT+Category;
+                  data_layer_1.loadGeoJson(urlPipeLineRT);
+                  data_layer_1.setStyle({
+                        strokeColor: 'green',
+                        strokeWeight: 2
+                  });
+                
+
+                data_layer_1.setMap(map);
+               
+
+                }
+
+            }, 8000);
+           
+
+            //launch when infowindow is loaded
+            google.maps.event.addListener(infowindow, 'domready', function () {
+                //code to dynamically load new content to infowindow
+                var paramPressure = localStorage.getItem('nimoCalculatorParamPressure');
+                if (paramPressure == null) paramPressure = "1";
+                var paramFlowrate = localStorage.getItem('nimoCalculatorParamFlowrate');
+                if (paramFlowrate == null) paramFlowrate = "0.16305";
+                var paramCustomer = localStorage.getItem('nimoCalculatorParamCustomer');
+                if (paramCustomer == null) paramCustomer = "PT XYZ";
+                document.getElementById("txtPressure").value = paramPressure;
+                document.getElementById("txtFlowRate").value = paramFlowrate;
+                document.getElementById("txtName").value = paramCustomer;
+                document.getElementById("txtCategory").value = CustumerCategory;
+
+            });
+            google.maps.event.addListener(infowindowCM, 'domready', function () {
+
+                var paramPressureInput = localStorage.getItem('nimoCalculatorParamPressureInput');
+                if (paramPressureInput == null) paramPressureInput = "1";
+                var paramFlowrateInput = localStorage.getItem('nimoCalculatorParamFlowrateInput');
+                if (paramFlowrateInput == null) paramFlowrateInput = "0.16305";
+                var paramNameInput = localStorage.getItem('nimoCalculatorParamNameInput');
+                if (paramNameInput == null) paramNameInput = "PT XYZ";
+                document.getElementById("txtPressureInput").value = paramPressureInput;
+                document.getElementById("txtFlowRateInput").value = paramFlowrateInput;
+                document.getElementById("txtNameInput").value = paramNameInput;
+                document.getElementById("txtCategory").value = CustumerCategory;
+
+            });
+
+        });
+
+      
+        //$("#ddlCategory").change(function () {
+        //    Category = $('#ddlCategory option:selected').text();;
+
+        //    var PositionParam = {};
+        //    PositionParam.category = Category;
+
+        //    var myObject = [];
+
+        //    myObject = null;
+        //    console.log(myObject);
+        //    //$('#show_map_canvas').show();
+           
+            
+
+        //    data_layer.setMap(map);
+        //    $.ajax({
+        //        type: "POST",
+        //        url: url_api_calculator_map,
+        //        contentType: "application/json",
+        //        dataType: "json",
+        //        data: JSON.stringify(PositionParam),
+        //        crossOrigin: false,
+        //        success: function (datasetArea) {
+
+    
+        //            myObject = datasetArea;
+
+        //            //setTimeout(function () {
+        //            //  $('#show_map_canvas').hide();
+
+                    
+        //              data_layer.addGeoJson(myObject);
+        //              data_layer.setStyle({
+        //                  strokeColor: 'red',
+        //                  strokeWeight: 2
+        //              });
+
+
+        //            //}, 4000);
+
+
+        //            //var pl_config_cal = {};
+        //            //pl_config_cal.CATEGORY = Category;
+        //            //$.ajax({
+        //            //    type: "POST",
+        //            //    url: url_api_calculator_category + "/Category",
+        //            //    contentType: "application/json",
+        //            //    dataType: "json",
+        //            //    data: JSON.stringify(pl_config_cal),
+        //            //    crossOrigin: false,
+        //            //    success: function (dataset) {
+
+
+        //            //        for (var i = 0; i < Object.keys(dataset).length; i++) {
+
+
+        //            //            var val = { AREA: dataset[i].AREA, REGIME: dataset[i].REGIME, FILE_NAME: dataset[i].FILE_NAME, LAT: dataset[i].LAT, LNG: dataset[i].LNG, ID_CONSTRUCTION: dataset[i].ID_CONSTRUCTION, CATEGORY: dataset[i].CATEGORY, ENABLED: dataset[i].ENABLED };
+
+
+        //            //            dataCategory.push(val);
+
+        //            //            if (Category == "Industri") {
+
+        //            //                CustumerCategory = dataset[0].CATEGORY;
+                                     
+
+        //            //            }
+        //            //            if (Category == "Rumah Tangga") {
+
+        //            //                CustumerCategory = dataset[0].CATEGORY;
+
+        //            //            }
+
+        //            //        }
+        //            //    }
+        //            //});
+
+                         
+
+
+					   // //launch when infowindow is loaded
+					   // google.maps.event.addListener(infowindow, 'domready', function () {
+					   //     //code to dynamically load new content to infowindow
+					   //     var paramPressure = localStorage.getItem('nimoCalculatorParamPressure');
+					   //     if (paramPressure == null) paramPressure = "0.1";
+					   //     var paramFlowrate = localStorage.getItem('nimoCalculatorParamFlowrate');
+					   //     if (paramFlowrate == null) paramFlowrate = "0.0007";
+					   //     var paramCustomer = localStorage.getItem('nimoCalculatorParamCustomer');
+					   //     if (paramCustomer == null) paramCustomer = "PT XYZ";
+					   //     document.getElementById("txtPressure").value = paramPressure;
+					   //     document.getElementById("txtFlowRate").value = paramFlowrate;
+					   //     document.getElementById("txtName").value = paramCustomer;
+					   //     document.getElementById("txtCategory").value = CustumerCategory;
+
+					   // });
+					   // google.maps.event.addListener(infowindowCM, 'domready', function () {
+
+					   //     var paramPressureInput = localStorage.getItem('nimoCalculatorParamPressureInput');
+					   //     if (paramPressureInput == null) paramPressureInput = "0.1";
+					   //     var paramFlowrateInput = localStorage.getItem('nimoCalculatorParamFlowrateInput');
+					   //     if (paramFlowrateInput == null) paramFlowrateInput = "0.0007";
+					   //     var paramNameInput = localStorage.getItem('nimoCalculatorParamNameInput');
+					   //     if (paramNameInput == null) paramNameInput = "PT XYZ";
+					   //     document.getElementById("txtPressureInput").value = paramPressureInput;
+					   //     document.getElementById("txtFlowRateInput").value = paramFlowrateInput;
+					   //     document.getElementById("txtNameInput").value = paramNameInput;
+					   //     document.getElementById("txtCategory").value = CustumerCategory;
+
+					   // });
+
+
+
+        //        }
+
+        //    });
+
+
+        //});
+
+
+
+        $.ajax({
+            type: "Get",
+
+            url: url_api_set_temperature2,
+            contentType: "application/json",
+            dataType: "json",
+
+            crossOrigin: false,
+            success: function (data) {
+
+                Tav = data[0].VALUE;
+
+
+            }
+        });
+
+
+        function initialize(val) {
+            // Create the Google Map
+
+
+            var myLatlng = new google.maps.LatLng(latitude, longitude);
+            var mapOptions = {
+                zoom: 10,
+                center: myLatlng,
+                draggableCursor: 'pointer',
+                draggingCursor: 'pointer',
+                panControl: false,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            }
+            map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+            // Load the geojson from a URL - this is asynchronous, so process the data in a callback function
+            //map direction
+                if (val == "Automatic") {
+
+                    google.maps.event.addListener(map, "click", function (event) {
+                        position = event.latLng;
+                        positionLat = position.lat();
+                        positionLng = position.lng();
+                        minDistance = -1;
+                        point = null;
+
+                        CustumerCategory = $('#ddlCategory option:selected').text();
+                        var pl_config_cal = {};
+                        pl_config_cal.CATEGORY = CustumerCategory;
+                        $.ajax({
+                            type: "POST",
+                            url: url_api_calculator_category + "/Category",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(pl_config_cal),
+                            crossOrigin: false,
+                            success: function (dataset) {
+
+
+                                for (var i = 0; i < Object.keys(dataset).length; i++) {
+
+
+                                    var val = { AREA: dataset[i].AREA, REGIME: dataset[i].REGIME, FILE_NAME: dataset[i].FILE_NAME, LAT: dataset[i].LAT, LNG: dataset[i].LNG, ID_CONSTRUCTION: dataset[i].ID_CONSTRUCTION, CATEGORY: dataset[i].CATEGORY, ENABLED: dataset[i].ENABLED };
+
+
+                                    dataCategory.push(val);
+
+                                    if (CustumerCategory == "Industri") {
+
+                                        CustumerCategory = dataset[0].CATEGORY;
+                                        idConstruction = dataset[0].ID_CONSTRUCTION;
+
+
+                                    }
+                                    if (CustumerCategory == "Rumah Tangga") {
+
+                                        CustumerCategory = dataset[0].CATEGORY;
+                                        idConstruction = dataset[0].ID_CONSTRUCTION;
+
+
+                                    }
+
+                                }
+                            }
+                        });
+
+            
+
+                        infowindow.setContent(formStr);
+                        infowindow.setPosition(position);
+                        infowindow.open(map);
+                    });
+
+                    $('#btnCM').hide();
+                    $("#top10ItemsChart").html("");
+
+                    $('#top10Legend').html("");
+                    $('#txt_Diameter').empty();
+                    $('#txt_Presure').empty();
+                    $('#textdiameter').empty();
+                    $('#txt_diameter_max').empty();
+                    $('#textpresure').empty();
+                    $('#txt_length').empty();
+                    $('#txt_Cost').empty();
+                    $('#txt_NPV').empty();
+                    $('#txt_IRR').empty();
+                }
+
+                var sidebar = L.control.sidebar('sidebar').addTo(map);
+                if (val == "Manual") {
+                    google.maps.event.addListener(map, "click", function (event) {
+                        position = event.latLng;
+                        positionLat = position.lat();
+                        positionLng = position.lng();
+                        minDistance = -1;
+                        point = null;
+
+                        CustumerCategory = $('#ddlCategory option:selected').text();
+                        var pl_config_cal = {};
+                        pl_config_cal.CATEGORY = CustumerCategory;
+                        $.ajax({
+                            type: "POST",
+                            url: url_api_calculator_category + "/Category",
+                            contentType: "application/json",
+                            dataType: "json",
+                            data: JSON.stringify(pl_config_cal),
+                            crossOrigin: false,
+                            success: function (dataset) {
+
+
+                                for (var i = 0; i < Object.keys(dataset).length; i++) {
+
+
+                                    var val = { AREA: dataset[i].AREA, REGIME: dataset[i].REGIME, FILE_NAME: dataset[i].FILE_NAME, LAT: dataset[i].LAT, LNG: dataset[i].LNG, ID_CONSTRUCTION: dataset[i].ID_CONSTRUCTION, CATEGORY: dataset[i].CATEGORY, ENABLED: dataset[i].ENABLED };
+
+
+                                    dataCategory.push(val);
+
+                                    if (CustumerCategory == "Industri") {
+
+                                        CustumerCategory = dataset[0].CATEGORY;
+                                        idConstruction = dataset[0].ID_CONSTRUCTION;
+
+
+                                    }
+                                    if (CustumerCategory == "Rumah Tangga") {
+
+                                        CustumerCategory = dataset[0].CATEGORY;
+                                        idConstruction = dataset[0].ID_CONSTRUCTION;
+
+
+                                    }
+
+                                }
+                            }
+                        });
+
+                        addLatLngManual();
+
+                    });
+
+					$('#btnCM').show();
+					$("#top10ItemsChart").html("");
+
+					$('#top10Legend').html("");
+					$('#txt_Diameter').empty();
+					$('#txt_Presure').empty();
+					$('#textdiameter').empty();
+					$('#txt_diameter_max').empty();
+					$('#textpresure').empty();
+					$('#txt_length').empty();
+					$('#txt_Cost').empty();
+					$('#txt_NPV').empty();
+					$('#txt_IRR').empty();
+
+                }
+
+
+                // load pipeline
+                data_layer = new google.maps.Data({ map: map });
+                data_layer_1 = new google.maps.Data({ map: map });
+                //data_layer_3 = new google.maps.Data({ map: map });
+                //data_layer_4 = new google.maps.Data({ map: map });
+
+            }
+
+
+
+        $("#start").change(function () {
+
+            var ddlmapoption = $('#start option:selected').text();
+
+
+            ddlmap = ddlmapoption;
+
+
+        });
+
+
+        // Sets the map on all markers in the array.
+        function setMapOnAll(map) {
+            for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(map);
+
+            }
+
+
+
+        }
+
+        // Removes the markers from the map, but keeps them in the array.
+        function clearMarkers() {
+            setMapOnAll(null);
+
+
+
+        }
+
+        // Deletes all markers in the array by removing references to them.
+        function deleteMarkers() {
+            if (confirm("Are you sure want to delete this location?") == true) {
+                clearMarkers();
+                markers = [];
+
+                for (i = 0; i < polyline.length; i++) {
+                    polyline[i].setMap(null); //or line[i].setVisible(false);
+                }
+
+                $("#top10ItemsChart").html("");
+
+                $('#top10Legend').html("");
+                $('#txt_Diameter').empty();
+                $('#txt_Presure').empty();
+                $('#textdiameter').empty();
+                $('#txt_diameter_max').empty();
+                $('#textpresure').empty();
+                $('#txt_length').empty();
+                $('#txt_Cost').empty();
+                $('#txt_NPV').empty();
+                $('#txt_IRR').empty();
+            }
+        }
+
+        function formPopUp() {
+            if('#txt_length'!= null)
+			{
+            point = null;
+            $.ajax({
+                type: "Get",
+                url: url_api_set_temperature2,
+                contentType: "application/json",
+                dataType: "json",
+                crossOrigin: false,
+                success: function (data) {
+                    Tav = data[0].VALUE;
+                }
+            });
+
+
+         
+            infowindowCM.setContent(formStrCalculate);
+            infowindowCM.setPosition(position);
+            infowindowCM.open(map);
+			}
+
+
+        }
+
+        function deleteDataLayer() {
+
+
+            data_layer.setMap(null);
+
+        }
+
+        function Validator()
+		{
+
+			PressureInput = document.getElementById("txtPressure").value;
+			FlowrateInput = document.getElementById("txtFlowRate").value;
+            Category = $('#ddlCategory option:selected').text()
+			Customer = document.getElementById("txtName").value;
+		    Calculate();
+		    
+
+	    }
+
+
+        function Calculate() {
+
+            clearMarkers();
+            markers = [];
+
+            for (i = 0; i < polyline.length; i++) {
+                polyline[i].setMap(null); 
+            }
+
+            $("#top10ItemsChart").html("");
+            $('#top10Legend').html("");
+            $('#txt_Diameter').empty();
+            $('#txt_Presure').empty();
+            $('#textdiameter').empty();
+            $('#txt_diameter_max').empty();
+            $('#textpresure').empty();
+            $('#txt_length').empty();
+            $('#txt_Cost').empty();
+            $('#txt_NPV').empty();
+            $('#txt_IRR').empty();
+
+            PressureInput = document.getElementById("txtPressure").value;
+            FlowrateInput = document.getElementById("txtFlowRate").value;
+            Category = $('#ddlCategory option:selected').text()
+            Customer = document.getElementById("txtName").value;
+
+			var myOrigin = { lat: positionLat, lng: positionLng, distance: 0, pressureinput: PressureInput, flowrateinput: FlowrateInput, tav: Tav, category : Category, customer : Customer, idConstruction: idConstruction ,  areaPipeline:areaPipeline };
+
+          
+
+            $('#button').hide();
+            $('.Calculat').addClass('Calculating');
+            
+
+      
+            //var myParameter = { locations: listPointTop, origin: myOrigin };
+            $.ajax({
+                type: "POST",
+
+                url: url_api_calculator,
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(myOrigin),
+                crossOrigin: false,
+                success: function (dataset) {
+
+                    pipeName = dataset.name;
+                    pipePresure = dataset.pressure;
+                    pipeFlowRate = dataset.flowrate;
+                    pipeInsideDiameter = dataset.sourcepipediameter;
+                    distance = dataset.distance;
+                    diameter = dataset.diameterestimate;
+                    cost = dataset.cost;
+                    NominalPipeSize = dataset.NominalPipeSize;
+					PressureInput =  dataset.pressureinput ;
+					FlowrateInput = dataset.flowrateinput;
+                    Category      = dataset.category;
+                    Customer = dataset.customer;
+                    pMin = dataset.pressureMin;
+					diameter = diameter.toFixed(4);
+					pipeRoughness = dataset.roughness;
+                    point = new google.maps.LatLng({ lat: dataset.lat, lng: dataset.lng });
+                    Lat  = dataset.lat;
+                    Lng  = dataset.lng;
+                    unit = dataset.unit;
+                    document.getElementById("txt_Presure").value = pipePresure + "/" + pMin;
+
+                    document.getElementById("txt_Diameter").value = pipeInsideDiameter;
+                    document.getElementById("textpresure").value = PressureInput + "/" + pMin;
+                    document.getElementById("txt_length").value = distance;
+                    cre_by = document.getElementById("create_user_by").value;
+
+                    txlocation = FlowrateInput;
+                    txtremaining = pipeFlowRate - FlowrateInput;
+                       if (txtremaining <= 0)
+				       {
+						    txlocation = 0;
+						     txtremaining = 100;
+				       }
+
+                    txlocation = txlocation;
+                    txtremaining = txtremaining.toFixed(4);
+                    DrawPiechart(txlocation, txtremaining);
+                    wayA = new google.maps.Marker({
+                        position: point,
+                        map: map,
+                        icon: '@Url.Content("~/Content/Themeforest")/assets/layouts/layout/img/red_MarkerA.png'
+
+                    });
+                    wayB = new google.maps.Marker({
+                        position: position,
+                        map: map,
+
+                        icon: '@Url.Content("~/Content/Themeforest")/assets/layouts/layout/img/darkgreen_MarkerB.png'
+                    });
+                    markers.push(wayA);
+                    markers.push(wayB);
+
+                    //Renderiza a rota, o draggable é diz se o waypoint é arrastavel ou não
+                    ren = new google.maps.DirectionsRenderer({
+                        //'draggable': true
+
+
+                    });
+                    ren.setMap(map);
+                    ren.setOptions({ suppressMarkers: true });
+                    ren.setPanel(document.getElementById("directionsPanel"));
+                    markers.push(ren);
+                    ser = new google.maps.DirectionsService();
+
+                    //Cria a rota, o DirectionTravelMode pode ser: DRIVING, WALKING, BICYCLING ou TRANSIT
+                    ser.route({
+                        'origin': wayA.getPosition(),
+                        'destination': wayB.getPosition(),
+                        'travelMode': google.maps.DirectionsTravelMode.WALKING
+                    }, function (res, sts) {
+
+                        
+
+                        if (sts == 'OK') {
+                            //debugger;
+
+                            ren.setDirections(res);
+
+                            //list coordinates
+                            var length = res.routes[0].overview_path.length;
+                            var coordinates = [];
+                            for (var i = 0; i < length; i++) {
+                                var myCoordinate = res.routes[0].overview_path[i];
+                                var lat = myCoordinate.lat();
+                                var lng = myCoordinate.lng();
+                                var coordinate = { lat: lat, lng: lng };
+                                coordinates.push(coordinate);
+                            }
+
+
+                            
+
+                            document.getElementById("textdiameter").value = diameter;
+                            document.getElementById("txt_diameter_max").value = NominalPipeSize + "     " + unit;
+
+                            var Rupiah = accounting.formatMoney(cost, "Rp", 2, ".", ",");
+                            document.getElementById("txt_Cost").value = Rupiah;
+
+							AddCalculator(pipeInsideDiameter, pipePresure, diameter, PressureInput, FlowrateInput, distance, cost, txlocation, txtremaining, Lat, Lng , Category, Customer, cre_date, cre_by);
+
+
+                        }
+                        });
+                    setTimeout(function () {
+                        $('.Calculat').removeClass('Calculating');
+
+                        $('#button').hide();
+                        $('.Estimat').addClass('Estimating');
+                        setTimeout(function () {
+                            $('.Estimat').removeClass('Estimating');
+
+                        }, 2500);
+
+                    }, 1000);
+
+                    infowindow.close();
+
+
+                },
+                error: function () {
+                    alert("Error calculate path.");
+                }
+            });
+
+        }
+
+
+
+        function addLatLngManual(event) {
+            var myOrigin = { lat: positionLat, lng: positionLng, distance: 0, category: Category };
+
+            debugger;
+
+            $.ajax({
+                type: "POST",
+
+                url: url_api_calculator + "/CalculateRoute",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(myOrigin),
+                crossOrigin: false,
+                success: function (dataset) {
+                    pipeNameSource = dataset.name;
+                    pipePresureMax = dataset.pressure;
+                    pipeFlowRateSource = dataset.flowrate;
+                    pipeInsideDiameter = dataset.sourcepipediameter;
+                    LengthInMeters = dataset.distance;
+                    diameter = dataset.diameterestimate;
+                    cost = dataset.cost;
+                    NominalPipeSize = dataset.NominalPipeSize;
+                    PressureInput = dataset.pressureinput;
+                    FlowrateInput = dataset.flowrateinput;
+                    Category = dataset.category;
+                    Customer = dataset.customer;
+                    pipePresureMin = dataset.pressureMin;
+                    pipeRoughness = dataset.roughness;
+                    diameter = diameter.toFixed(4);
+                    unit = dataset.unit;
+                    debugger;
+                pointManual = new google.maps.LatLng({ lat: dataset.lat, lng: dataset.lng });
+                way1 = new google.maps.Marker({
+                    position: pointManual,
+                    map: map,
+                    icon: '@Url.Content("~/Content/Themeforest")/assets/layouts/layout/img/red_MarkerA.png'
+                });
+
+                way2 = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    icon: '@Url.Content("~/Content/Themeforest")/assets/layouts/layout/img/darkgreen_MarkerB.png'
+                });
+
+                google.maps.event.addListener(way1, 'position_changed', update);
+                google.maps.event.addListener(way2, 'position_changed', update);
+
+                poly = new google.maps.Polyline({
+                    strokeColor: '#CC0099',
+                    strokeOpacity: 1.0,
+                    strokeWeight: 3,
+                    map: map,
+                    editable: true
+                });
+
+                markers.push(way1);
+                markers.push(way2);
+                //poly.setMap(map);
+
+                update();
+                polyline.push(poly);
+
+
+				}
+            });
+        }
+
+        function Validator2() {
+
+            updateLength();
+
+            PressureInputManual = document.getElementById("txtPressureInput").value;
+            FlowrateInputManual = document.getElementById("txtFlowRateInput").value;
+            CategoryInputManual = Category;
+            CustomerNameInputManual = document.getElementById("txtNameInput").value;
+
+            CalculateManual();
+
+        }
+
+        function CalculateManual() {
+
+
+
+            var myParam = {  pressure : pipePresureMax, distance: LengthInMeters, pressureinput: PressureInputManual, flowrateinput: FlowrateInputManual, tav: Tav, category: CategoryInputManual, customer: CustomerNameInputManual, pressure: pipePresureMax, pressureMin: pipePresureMin, flowrate: pipeFlowRateSource, sourcepipediameter: pipeInsideDiameter, name: pipeNameSource, roughness: pipeRoughness, idConstruction: idConstruction, areaPipeline: areaPipeline };
+
+            $('#btnCalculateManual').hide();
+            $('.Calculat').addClass('Calculating');
+            setTimeout(function () {
+                $('.Calculat').removeClass('Calculating');
+
+                $('#btnCalculateManual').hide();
+                $('.Estimat').addClass('Estimating');
+                setTimeout(function () {
+                    $('.Estimat').removeClass('Estimating');
+
+                }, 2500);
+
+            }, 1000);
+            $.ajax({
+                type: "POST",
+
+                url: url_api_calculator + "/CalculateManual",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(myParam),
+                crossOrigin: false,
+                success: function (dataset) {
+                    pipeNameSource = dataset.name;
+                    pipePresureMax = dataset.pressure;
+                    pipeFlowRateSource = dataset.flowrate;
+                    pipeInsideDiameter = dataset.sourcepipediameter;
+                    LengthInMeters = dataset.distance;
+                    diameter = dataset.diameterestimate;
+                    cost = dataset.cost;
+                    NominalPipeSize = dataset.NominalPipeSize;
+                    PressureInput = dataset.pressureinput;
+                    FlowrateInput = dataset.flowrateinput;
+                    Category = dataset.category;
+                    Customer = dataset.customer;
+                    pipePresureMin = dataset.pressureMin;
+                    diameter = diameter.toFixed(4);
+                    unit = dataset.unit;
+                    document.getElementById("txt_Presure").value = pipePresureMax + "/" + pipePresureMin;
+                    document.getElementById("txt_Diameter").value = pipeInsideDiameter;
+                    document.getElementById("textpresure").value = PressureInputManual;
+                    document.getElementById("txt_length").value = LengthInMeters;
+
+                    cre_by = document.getElementById("create_user_by").value;
+                    txlocation = FlowrateInputManual;
+                    txtremaining = pipeFlowRateSource - FlowrateInputManual;
+                    if (txtremaining <= 0) {
+                        txlocation = 0;
+                        txtremaining = 100;
+                    }
+                    txlocation = txlocation;
+                    txtremaining = txtremaining.toFixed(4);
+                    DrawPiechart(txlocation, txtremaining);
+                    document.getElementById("textdiameter").value = diameter;
+                    document.getElementById("txt_diameter_max").value = NominalPipeSize + "     " + unit;;
+                    var Rupiah = accounting.formatMoney(cost, "Rp", 2, ".", ",");
+                    document.getElementById("txt_Cost").value = Rupiah;
+                    AddCalculator(pipeInsideDiameter, pipePresureMax, diameter, PressureInput, FlowrateInput, LengthInMeters, cost, txlocation, txtremaining, Lat, Lng, Category, Customer, cre_date, cre_by);
+                    infowindowCM.close();
+
+                },
+                error: function () {
+                    alert("Error calculate path.");
+                }
+            });
+        }
+
+        function update() {
+            path = [way1.getPosition(), way2.getPosition()];
+            poly.setPath(path);
+
+            var heading = google.maps.geometry.spherical.computeHeading(path[0], path[1]);
+            var length = google.maps.geometry.spherical.computeLength(poly.getPath());
+            kmlength = (length * .001).toFixed(2) * 1000;
+
+        }
+
+        function updateLength() {
+            UpdateLength  = (google.maps.geometry.spherical.computeLength(poly.getPath()) / 1000).toFixed(2);
+            LengthInMeters = UpdateLength * 1000;
+        };
+        google.maps.event.addDomListener(window, 'load', initialize("Automatic"));
+
+        //Add event handler.
+        function AddCalculator(pipeInsideDiameter, pipePresure, diameter, PressureInput, FlowrateInput , distance, cost, txlocation, txtremaining, Lat, Lng, Category, Customer, cre_date, cre_by) {
+            var datapost = {};
+            datapost.SOURCE_DIAMETER = pipeInsideDiameter;
+            datapost.SOURCE_PRESSURE = pipePresure;
+            datapost.FLOWRATE_INPUT = FlowrateInput;
+            datapost.PRESSURE_INPUT = PressureInput;
+            datapost.ESTIMATED_DIAMETER = diameter;
+            datapost.ESTIMATED_LENGTH = distance;
+            datapost.ESTIMATED_COST = cost;
+            datapost.ESTIMATED_FLOWRATE = txlocation;
+            datapost.REMAINING_CAPACITY = txtremaining;
+            datapost.CATEGORY = Category  ;
+            datapost.CUSTOMER = Customer ;
+            datapost.LAT = Lat;
+            datapost.LNG = Lng;
+            datapost.CREATED_DATE = cre_date;
+            datapost.CREATED_BY = cre_by;
+            $.ajax({
+                type: "POST",
+                url: url_api_add_calculate,
+                data: JSON.stringify(datapost),
+
+                contentType: "application/json",
+                dataType: "json",
+                crossOrigin: false,
+                success: function (data) {
+
+                    tablehistory.ajax.reload();
+                    var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
+                    var currentTime = new Date();
+                    hour = currentTime.getHours();
+                    min = currentTime.getMinutes();
+                    sec = currentTime.getSeconds();
+                    var cre_date = utc + " " + hour + ":" + min + ":" + sec;
+                    var DataCSV = [{ "SOURCE_DIAMETER": pipeInsideDiameter, "SOURCE_PRESSURE": pipePresure, "ESTIMATED_DIAMETER": diameter, "ESTIMATED_PRESSURE": PressureInput, "ESTIMATED_LENGTH": distance, "ESTIMATED_COST": cost, "ESTIMATED_FLOWRATE": txlocation, "REMAINING_CAPACITY": txtremaining, "LAT": Lat, "CREATED_DATE": cre_date, "CREATED_BY": cre_by }];
+                }
+
+            });
+        }
+
+        function DrawPiechart(txlocation, txtremaining) {
+            var data = [{
+                value: txlocation,
+                color: "#45B6DF",
+                label: "this location"
+            }, {
+                value: txtremaining,
+                color: "#ACB5C3",
+                label: "remaining"
+            },
+
+            ];
+
+            var optionsPie = {
+                //responsive: true,
+                //scaleBeginAtZero: true,
+                legendTemplate: "<div class=\"<%=name.toLowerCase()%>-legend\"><%for (var i=0; i<segments.length; i++){%><span style=\"background-color:<%=segments[i].fillColor%>\"></span><%if(segments[i].label){%><%=segments[i].label%>,&nbsp;<%=segments[i].value%>&nbsp;MMSCFD<br><%}%><%}%></div><br>"
+            }
+
+            var ctx = $("#top10ItemsChart").get(0).getContext("2d");
+            var top10PieChart = new Chart(ctx).Pie(data, optionsPie);
+            $("#top10Legend").html(top10PieChart.generateLegend());
+        }
+    </script>
+
+    <script>
+        function capture() {
+            //for capture page
+            var utc = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
+            $("#dlt").hide();
+            $("#prt").hide();
+            setTimeout(function () {
+                $("#dlt").show();
+                $("#prt").show();
+            }, 200);
+            html2canvas($('#capture'), {
+                useCORS: true,
+                allowTaint: false,
+                onrendered: function (canvas) {
+                    var link = document.createElement("a");
+                    var imgString = canvas.toDataURL("image/jpg");
+                    link.href = imgString;
+                    link.download = 'Calcultor' + utc + '.jpg';
+                    link.click();
+                }
+            });
+
+
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+

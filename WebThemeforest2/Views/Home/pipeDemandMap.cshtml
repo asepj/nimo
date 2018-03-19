@@ -1,0 +1,1620 @@
+﻿<!doctype html>
+
+
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Heatmap Google Leaflet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Leaflet Styles -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css"
+          integrity="sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw=="
+          crossorigin="" />
+
+    <!-- Leaflet Libraryi -->
+    <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+            integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+            crossorigin="">
+    </script>
+    <script src="@Url.Content("~/Scripts")/scripts/leaflet.zoomdisplay-src.js"></script>
+
+    <!-- Get google API Key -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDO34flnKgsVYjhg3LQ0PDmXQRuMWlScWM" async defer></script>
+
+    <!-- Get google API Key -->
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCS6bdUDAE60MLhNmzIryBwABVZaLnd6e8" async defer></script> -->
+    <!-- Load google leaflet plugin -->
+    <script src="https://unpkg.com/leaflet.gridlayer.googlemutant@latest/Leaflet.GoogleMutant.js"></script>
+
+    <!-- Load jquery plugin -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+
+
+
+
+    <link href="@Url.Content("~/Scripts")/css/heatmapControl.css" rel="stylesheet" />
+    <link href="@Url.Content("~/Scripts")/css/leaflet-sidebar.css" rel="stylesheet" />
+    <link href="@Url.Content("~/Scripts")/css/leaflet-slider.css" rel="stylesheet" />
+    <link href="@Url.Content("~/Scripts")/css/leaflet.zoomdisplay.css" rel="stylesheet" />
+    <link href="@Url.Content("~/Scripts")/css/overview.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+    <div id="sidebar" class="sidebar collapsed">
+        <!-- Nav tabs -->
+        <div class="sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li>
+            </ul>
+        </div>
+
+        <!-- Tab panes -->
+        <div class="sidebar-content">
+            <div class="sidebar-pane" id="settings">
+                <h1 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+                <br>
+                <!--
+                                <label><strong>Demand Map settings</strong></label><br />
+                                <table width="300" border="0">
+                                    <colgroup>
+                                        <col width="125">
+                                        <col width="175">
+                                    </colgroup>
+                                    <tbody>
+                                        <tr>
+                                            <td>Use local extrema</td>
+                                            <td><input name="demandExtrema" id="demandExtrema" type="checkbox" onChange="javascript:setDemandExtrema(this.value);" /></td>
+                                        </tr>
+                                                        <tr>
+                                                              <td>Opacity (0 - 1)</td>
+                                                              <td><input id="demandOpacity" type="range" min="0.00" max="1.00" step = "0.05" value="0.50"/></td>
+                                                            </tr>
+
+                                        <tr>
+
+                                                                  <td>Color palette</td>
+                                                                  <td>
+                                                                    <select name="demandPalette" id="demandPalette" >
+                                                                        <option value="OrRd">OrRd</option>
+                                                                        <option value="Oranges">Oranges</option>
+                                                                        <option value="YlOlBr">YlOlBr</option>
+                                                                        <option value="Reds">Reds</option>
+                                                                        <option value="YlOrRd">YlOrRd</option>
+                                                                        <option value="Spectral">Spectral</option>
+                                                                        <option value="RdYlGn">RdYlGn</option>
+                                                                        <option value="RdYlBu">RdYlBu</option>
+                                                                        <option value="Set1">Set1</option>
+                                                                        <option value="Accent">Accent</option>
+                                                                        <option value="Paired">Paired</option>
+                                                                    </select>
+                                                                  </td>
+
+                                                              <td>Blur (0 - 1)</td>
+                                                                  <td><input id="demandBlur" type="range" min="0.00" max="1.00" step = "0.05" value="0.50"/></td>
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                -->
+                <label>Setting Choice</label>&nbsp;&nbsp;<select name="settingChoice" id="settingChoice" onchange="javascript:setSettingChoice(this.value);">
+                    <option value="Automatic" selected>Automatic</option>
+                    <option value="Manual">Manual</option>
+                </select><br /> <br />
+
+                <div id="content-Setting">
+                    @*  start saturation map setting *@
+                    <label><strong>Saturated Map settings</strong></label><br />
+                    <table width="300" border="0">
+                        <colgroup>
+                            <col width="125">
+                            <col width="175">
+                        </colgroup>
+                        <tbody>
+                            @*<tr>
+                                    <td>Weight (1 - 50)</td>
+                                    <td><input id="pipelineWeight" type="range" min="1" max="50" value="3" /></td>
+                                </tr>*@
+                            <tr>
+                                <td>Opacity (0 - 1)</td>
+                                <td><input id="pipelineOpacity" type="range" min="0.00" max="1.00" step="0.05" value="0.8" /></td>
+                            </tr>
+                            <tr></tr>
+                            <tr>
+                                <td>Classes</td>
+                                <td>
+                                    <select name="pipelineClasses" id="pipelineClasses" onchange="javascript:setPipelineClasses(this.value);">
+                                        <option value="3">3</option>
+                                        <option value="4" selected>4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Classification</td>
+                                <td>
+                                    <select name="pipelineClassification" id="pipelineClassification" onchange="javascript:setPipelineClassification(this.value);">
+                                        <option value="equal_interval">Equal</option>
+                                        <option value="quantile" selected>Quantile</option>
+                                        @*<option value="Jenks">Jenks</option>*@
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Color palette</td>
+                                <td>
+                                    <select name="pipelinePalette" id="pipelinePalette" onchange="javascript:setPipelinePalette(this.value);">
+                                        <option value="OrRd">OrRd</option>
+                                        <option value="Oranges">Oranges</option>
+                                        <option value="Reds">Reds</option>
+                                        <option value="YlOrRd" selected>YlOrRd</option>
+                                        <option value="Spectral">Spectral</option>
+                                        <!--                                     <option value="RdYlGn">RdYlGn</option>
+                                                                            <option value="RdYlBu">RdYlBu</option>
+                                                                            <option value="Set1">Set1</option>
+                                                                            <option value="Accent">Accent</option>
+                                                                            <option value="Paired">Paired</option> -->
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table><br>
+                    @*  end saturation map setting *@
+                    @*  <-------------------------------------------------------------------------------------->
+                        <--------------------------------------------------------------------------------------> *@
+                    @*  start node map setting *@
+                    <label><strong>Node Map settings</strong></label><br />
+                    <table width="300" border="0">
+                        <colgroup>
+                            <col width="125">
+                            <col width="175">
+                        </colgroup>
+                        <tbody>
+                            @*<tr>
+                                    <td>Weight (1 - 50)</td>
+                                    <td><input id="pipelineWeight" type="range" min="1" max="50" value="3" /></td>
+                                </tr>*@
+                            <tr>
+                                <td>Opacity(0 - 1)</td>
+                                <td><input id="NodeOpacity" type="range" min="0.00" max="1.00" step="0.05" value="0.8" /></td>
+                            </tr>
+                            <tr></tr>
+                            <tr>
+                                <td>Classes</td>
+                                <td>
+                                    <select name="pipelineClasses" id="NodeClasses" onchange="javascript:setNodeClasses(this.value);">
+                                        <option value="3">3</option>
+                                        <option value="4" selected>4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Classification</td>
+                                <td>
+                                    <select name="pipelineClassification" id="NodeClassification" onchange="javascript:setNodeClassification(this.value);">
+                                        <option value="equal_interval">Equal</option>
+                                        <option value="quantile" selected>Quantile</option>
+                                        @*<option value="Jenks">Jenks</option>*@
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Color palette</td>
+                                <td>
+                                    <select name="pipelinePalette" id="NodePalette" onchange="javascript:setNodePalette(this.value);">
+                                        <option value="OrRd">OrRd</option>
+                                        <option value="Oranges">Oranges</option>
+                                        <option value="Reds">Reds</option>
+                                        <option value="YlOrRd" selected>YlOrRd</option>
+                                        <option value="Spectral">Spectral</option>
+                                        <!--                                     <option value="RdYlGn">RdYlGn</option>
+                                                                            <option value="RdYlBu">RdYlBu</option>
+                                                                            <option value="Set1">Set1</option>
+                                                                            <option value="Accent">Accent</option>
+                                                                            <option value="Paired">Paired</option> -->
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    @*  start node map setting *@
+                </div>
+                <!--
+                                <label>Weight (1 - 50)    </label> <input id="pipelineWeight" type="range" min="1" max="50" value="15"/><br/>
+                                <label>Opacity (0 - 1)  </label> <input id="pipelineOpacity" type="range" min="0.00" max="1.00" step = "0.05" value="0.50"/><br/>
+                -->
+
+            </div>
+        </div>
+    </div>
+    <div id="map" class="sidebar-map">
+    </div>
+    <script src="@Url.Content("~/Scripts")/scripts/geostats.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/classybrew.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/heatmap.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/leaflet-heatmap.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/heatmapControl.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/leaflet-sidebar.js"></script>
+    <script src="@Url.Content("~/Scripts")/scripts/leaflet-slider.js"></script>
+
+    <script>
+        //var lat = -6.309031; //-6.378127;
+        //var lng = 107.134833; //107.108776;
+        var lat = -6.303503;
+        var lng = 107.143697;    //-6.303503, 107.143697
+        var mapzoom = 10;
+        var m3_per_hour_to_mmscfd = 0.000815249;
+
+        // Layers variable
+        var isDemandLayerSelected = false;
+        var pipelines, isPipelineLayerSelected = false;
+        var isPipelineLayerManualSelected = false;
+        var isNodeSelected = false;
+        var isNodeSelectedManual = false;
+        var heatmapLayer;
+        var demands;
+        var nodekar;
+        var nodekarManual;
+        var compePipeline;
+        var line_karawang;
+
+        // Legend variables
+        var legendPipelines;
+        var legendDemands;
+        var legendPipekar; //for legend manual pipeline
+        var legendNode;
+        var legendNodeManual;
+        //var heatmapLegend;
+
+        // variable to hold demand flowrate maximum and minimum
+        var minDemandFlowrate, maxDemandFlowrate;
+        var demandValueRange = [];
+
+        // variable to hold pipe flowrate value
+        var pipeFlowrate = [];
+        var pipeFlowrateRelative = [];
+        // variable to hold pipe flowrate maximum and minimum
+        var minPipeFlowrate, maxPipeFlowrate;
+        // variable to hold pipe diameters
+        var pipeDiameters = [];
+        var minPipeDiameter;
+        var maxPipeDiameter;
+
+        var pipeValueRange = [];
+        var percents;
+        var selectedPipelineClasses = document.getElementById("pipelineClasses").value;
+        var selectedClassification, selectedColorPalette;
+
+        // Color bucket
+        var colorBucket = ['#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026', '#800026'];
+        var brewDemand, fromDemand, toDemand, labelsDemand;
+        var brewPipeline, fromPipeline, toPipeline, labelsPipeline, labelsPipelinekar, labelsNode, labelsNodeManual;
+        var brewNode;
+        var data_setting = [];
+        var data_settingNode = [];
+        var tesvaldummy = [];
+
+        // Variable months
+        var months = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December'
+        ];
+
+        var currentMonth = 0;  // Set to January
+
+        //**************************************************************************************************************//
+        // Create google map
+        //**************************************************************************************************************//
+
+        // Create map
+        var map = new L.Map('map', {
+            //center: new L.LatLng(lat, lng),
+            center: [lat, lng],
+            zoom: mapzoom
+            //layers: [baseLayer, heatmapLayer]
+        });
+
+        // var map = L.map('map').setView([lat, lng],mapzoom); //test use openstreetmap
+
+        /*      L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map); */
+
+        // Create google map base layer
+        var googleBaseLayer = L.gridLayer.googleMutant({
+            type: 'roadmap',
+            styles: [
+                { elementType: 'labels', stylers: [{ visibility: 'on' }] }
+            ]
+        });
+
+        // Add base layer to map. Map shall show google map
+        googleBaseLayer.addTo(map);
+
+        // L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoia3VyYWt1cmFzYWx0bzEzIiwiYSI6ImNqOGl0MG50dzE5NDYyd293djVzcmtzemoifQ.WNoYgowZj3FZfT-IVZOrYA', {
+        //     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        //     maxZoom: 18,
+        //     id: 'mapbox.streets',
+        //     accessToken: 'your.mapbox.access.token'
+        //     }).addTo(map);
+
+        //**************************************************************************************************************//
+
+
+        // Add sidebar control to map
+        var sidebar = L.control.sidebar('sidebar').addTo(map);
+
+        //**************************************************************************************************************//
+        // Add slider control for data filtering based on month
+        //**************************************************************************************************************//
+
+        // Create date variable
+        var d = new Date();
+
+        // Set current month for initial filter
+        //var currentMonth = d.getMonth();
+
+
+        // Set current month + year
+        var currentMonthYear = months[currentMonth] + '-' + (d.getFullYear() - 1);
+
+        //20180215
+
+        
+        var year;
+        var mounth;
+        var legendMounth = L.control({ position: 'bottomleft' });
+        legendMounth.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info legend'); 
+            div.innerHTML = '<select id="mounth" onchange="getval(this);"><option id="1">January</option><option id="2">February</option><option id="3">March</option><option id="4">April</option><option id ="5">May</option><option id="6">June</option><option id="7">July</option><option id ="8">August</option><option id="9">September</option><option id="10">October</option><option id="11">November</option><option id="12">December</option></select>';
+
+            div.firstChild.onmousedown = div.firstChild.ondblclick = L.DomEvent.stopPropagation;
+
+           
+            return div;
+            
+        };
+
+
+        var legendYear = L.control({ position: 'bottomleft' });
+        legendYear.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML = '<select id ="year" onchange="getvalyear(this);"><option id ="1">2011</option><option id ="2">2012</option><option id ="3">2013</option><option id ="4">2014</option><option id ="5">2015</option><option id ="6">2016</option><option id ="7" status="0">2017</option><option id ="8">2018</option><option id ="9">2019</option><option id ="10">2020</option><option id ="11">2021</option><option id ="12">2022</option><option id ="13">2023</option><option id ="14">2024</option><option id ="15">2025</option></select>';
+
+            div.firstChild.onmousedown = div.firstChild.ondblclick = L.DomEvent.stopPropagation;
+
+     
+            return div;
+           
+        };
+
+
+        function getval(sel) {
+           
+
+            year = $('#year option:selected').text();
+
+           
+            alert(sel.value);
+            alert(year);
+            showDemandHeatmap(sel.value + '-' + year);
+
+        }
+
+        function getvalyear(sel) {
+
+          //showDemandHeatmap(mounth + '-' + sel.value);
+          isDemandLayerSelected = true;
+          map.addControl(heatmapLegend);
+          legendYear.addTo(map);
+          year = sel.value;
+
+          $('#year').val(year);
+
+          alert(sel.value);
+          monthlySlider.addTo(map);
+             
+
+        }
+
+     
+        // Create slider control object
+        var monthlySlider = L.control.slider(function (value) {
+            console.log(value);
+
+            // Only show demand map, when its selected
+            if (isDemandLayerSelected) {
+                var d = new Date();
+              
+
+                //mounth = $('#mounth option:selected').text();
+                //showDemandHeatmap(months[value] + '-' + (d.getFullYear() - 1));
+                //year = $('#year option:selected').text();
+
+                alert(year);
+
+                showDemandHeatmap(months[value] + '-' + year);
+
+  
+                currentMonth = value;
+            }
+
+        }, {
+                position: 'bottomleft',
+                collapsed: false,
+                min: 0,
+                max: 11,
+                step: 1,
+                value: currentMonth,
+                getValue: function (value) {
+                    var d = new Date();
+                   // return months[value] + '-' + (d.getFullYear() - 1);
+
+                    alert(year);
+
+                    return months[value] + '-' + year;
+                },
+                step: 1,
+                size: '250px',
+                orientation: 'horizontal',
+                id: 'slider'
+            }
+        );
+
+        // Add slide control to map
+        // monthlySlider.addTo(map);
+
+        //**************************************************************************************************************//
+
+
+        //**************************************************************************************************************//
+        // Create control layer to control layers appeareances
+        //**************************************************************************************************************//
+        var controlLayers = L.control.layers(null, null, {
+            position: "topright", // suggested: bottomright for CT (in Long Island Sound); topleft for Hartford region
+            collapsed: false // false = open by default
+        });
+        controlLayers.addTo(map);
+
+        // Control layer events
+
+        // Whan Layer added
+        map.on('overlayadd', function (eventLayer) {
+
+
+            if (eventLayer.name === "Saturated Map") {
+                isPipelineLayerSelected = true;
+                legendPipelines.addTo(map);
+                // drawNodeKarawang();
+            }
+            else if (eventLayer.name === "Demand Map") {
+         
+
+                isDemandLayerSelected = true;
+               
+                map.addControl(heatmapLegend);
+                //legendMounth.addTo(map);
+                legendYear.addTo(map);               
+                year = $('#year option:selected').text();
+                mounth = $('#mounth option:selected').text();
+                monthlySlider.addTo(map);
+                //showDemandHeatmap(mounth + '-' + year);
+            }
+            else if (eventLayer.name === "Competitor Pipeline") {
+                console.log("competitor");
+            }
+            else if (eventLayer.name === "Node Map") {
+                isNodeSelected = true;
+                console.log("Node");
+                legendNode.addTo(map);
+            }
+
+            else if (eventLayer.name === "Node Map Manual") {
+                isNodeSelectedManual = true;
+                legendNodeManual.addTo(map);
+            }
+            else {
+
+                isPipelineLayerManualSelected = true;
+                legendPipekar.addTo(map);
+                // drawNodeKarawang();
+            }
+
+        });
+
+        // Whan Layer removed
+        map.on('overlayremove', function (eventLayer) {
+            if (eventLayer.name === "Saturated Map") {
+
+                isPipelineLayerSelected = false;
+                map.removeControl(legendPipelines);
+                // map.removeLayer(nodekar);
+
+            }
+            else if (eventLayer.name === "Demand Map") {
+                isDemandLayerSelected = false;
+                map.removeControl(monthlySlider);
+                map.removeControl(heatmapLegend);
+                map.removeControl(legendYear);
+
+                // Add empty control
+                map.addControl(heatmapLegend);
+            }
+            else if (eventLayer.name === "Competitor Pipeline") {
+                // isPipelineLayerManualSelected = false ;
+                console.log("competitor");
+            }
+            else if (eventLayer.name === "Node Map") {
+                // isPipelineLayerManualSelected = false ;
+                isNodeSelected = false;
+                map.removeControl(legendNode);
+                console.log("Node");
+            }
+
+            else if (eventLayer.name === "Node Map Manual") {
+                isNodeSelectedManual = false;
+                map.removeControl(legendNodeManual);
+            }
+            else {
+                isPipelineLayerManualSelected = false;
+                legendPipekar.remove();
+                // map.removeLayer(nodekar);
+            }
+
+        });
+        //**************************************************************************************************************//
+
+
+        // Create layer group for heatmap
+        var layerGroup = new L.layerGroup();
+        var satGroup = new L.layerGroup();
+
+        // Create heatmap legend
+        var heatmapLegend = L.control.heatmapControl({ position: "bottomright" });
+
+        // Create heatmap layer configuration
+        var heatmapConfig = {
+            radius: 40,
+            "maxOpacity": 2,
+            "scaleRadius": false,
+            "useLocalExtrema": true,
+            blur: 0.9,
+            latField: 'lat',
+            lngField: 'lng',
+            valueField: 'value',
+            onExtremaChange: function (extremeData) {
+                heatmapLegend.updateLegend(extremeData);
+            }
+
+        };
+
+        // Create heatmap layer object
+        heatmapLayer = new HeatmapOverlay(heatmapConfig);
+
+        // Add heatmap layer to layerGroup
+        layerGroup.addLayer(heatmapLayer);
+
+        // Add layer group to control layer
+        controlLayers.addOverlay(heatmapLayer, "Demand Map");
+        map.addControl(heatmapLegend);
+
+        // Load pipeline data
+        showPipelines();
+        competitorPipeline();
+        drawLineManual();
+        drawNodeKarawang();
+        drawNodeManual();
+
+
+
+
+        //drawNodeKarawang();
+
+        //**************************************************************************************************************//
+        // Function to load Demand data and display it as a heatmap on the map
+        //**************************************************************************************************************//
+        function showDemandHeatmap(month) {
+           
+            debugger;
+            var d = [];
+            var testData;
+            // Variable to hold points and its intensity
+            var demandFlowrates = [];
+          
+            //var promise = $.getJSON(url_api_overview_map)
+            var promise = $.getJSON('http://localhost:32271/api/demandmap')
+            promise.then(function (data) {
+
+                // clear layers
+                layerGroup.clearLayers();
+
+                demands = new L.geoJson(data, {
+                    filter: function (feature, latlng) {
+                        //return feature.properties.MONTHLY === "January-2016";
+                        console.log(month);
+                        return feature.properties.Date === month;
+                    },
+                    pointToLayer: function (feature, latlng) {
+                        return L.circleMarker(latlng, { opacity: 0 });
+                    },
+                    onEachFeature: function (feature, layer) {
+                        /*                  var mmscfd = feature.properties.Demand * m3_per_hour_to_mmscfd;
+                                            layer.bindPopup(feature.properties.FacilityName + "</br>Flowrate: <b>" +
+                                                                mmscfd+ "</b>" );
+                                            demandFlowrates.push([feature.geometry.coordinates[1],feature.geometry.coordinates[0], feature.properties.FacilityName, mmscfd]);
+                                            d.push(mmscfd); */
+
+                        // * m3_per_hour_to_mmscfd ini perkalian di var mmscfd
+                        var mmscfd = feature.properties.Flowrate;
+                        layer.bindPopup(feature.properties.Name + "</br>Flowrate: <b>" +
+                            mmscfd + " mmscfd</b>");
+                        demandFlowrates.push([feature.geometry.coordinates[1], feature.geometry.coordinates[0], feature.properties.Name, mmscfd, feature.properties.Date]);
+                        d.push(mmscfd);
+                    }
+                });
+
+                //console.log(demands);
+                // Get pipe flow rate maximum and minimum
+                minDemandFlowrate = Math.min.apply(null, d);
+                maxDemandFlowrate = Math.max.apply(null, d);
+
+                // Loop through demand flowarates to set its intentsity for heatmap
+                var demandPointsIntensity = [];
+                for (var j = 0; j < demandFlowrates.length; j++) {
+                    var percentIntensity = demandFlowrates[j][3] / 1;
+                    var ob = {
+                        lat: demandFlowrates[j][0],
+                        lng: demandFlowrates[j][1],
+                        value: percentIntensity
+
+                    };
+
+                    demandPointsIntensity.push(ob);
+                    //console.log("Loop " + j + ";" + demandFlowrates[j][1] + "," + demandFlowrates[j][0] + "," + demandFlowrates[j][3] + "," +  maxDemandFlowrate + "," + percentIntensity );
+                }
+
+                testData = {
+                    max: maxDemandFlowrate * 1.0,
+                    data: demandPointsIntensity
+                };
+
+                console.log("Max:" + testData.max + ", " + demandFlowrates.length);
+
+                // Set heatmap layer data
+                heatmapLayer.setData(testData);
+
+                // Set point style
+                demands.setStyle({ opacity: 0, fillOpacity: 0 });
+
+                layerGroup.addLayer(demands);
+                layerGroup.addTo(map);
+                //map.fitBounds(demands.getBounds(), { padding: [50, 50] });
+                debugger;
+            })
+        };
+        //**************************************************************************************************************//
+
+
+        //**************************************************************************************************************//
+        // Function to load pipeline data and display it  on the map
+        //**************************************************************************************************************//
+        function showPipelines() {
+
+            var dummy1 = [];
+            // Load data pipeline
+            var promise = $.getJSON(url_api_overview_map2);
+            // var promiseNodKar = $.getJSON(url_api_overview_map4);
+
+            promise.then(function (data) {
+                // add GeoJSON layer to the map once the file is loaded
+
+                //add feature.properties.PipeC20721 to array pipeFlowrate for get maxvalue
+                L.geoJson(data, {
+
+
+                    onEachFeature: function (feature, layer) {
+                        //because PipeC20721 have 0
+                        var flow_divider = feature.properties.PipeC20721;
+                        if (feature.properties.PipeC20721 != 0) {
+                            pipeFlowrateRelative.push((Math.abs(feature.properties.Flow) / flow_divider).toFixed(2));
+                            pipeFlowrate.push(Math.abs(feature.properties.Flow));
+
+                        }
+                        pipeDiameters.push(feature.properties.PipeDi2003);
+
+                        // dummy1.push(flow_divider);
+
+                        // Get relative utilization
+
+
+                    }
+                });
+
+
+                // Get pipe flow rate maximum
+                maxPipeFlowrate = Math.max.apply(null, pipeFlowrate);
+
+
+                console.log(pipeFlowrate);
+                console.log(dummy1);
+
+                pipelines = L.geoJson(data, {
+
+                    //style: pipelineStyle,
+                    onEachFeature: function (feature, layer) {
+                        var flow_divider = feature.properties.PipeC20721;
+                        // if(feature.properties.PipeC20721== 0 )
+                        // {
+                        //     flow_divider = 1 ;
+                        // }
+
+                        layer.bindPopup("Facility: <b>" + feature.properties.FacNam1005 + "</b></br>" +
+                            "Diameter: <b>" + (feature.properties.PipeDi2003).toFixed(4) + "in</b></br>" +
+                            "Pressure Min: <b>" + feature.properties.Pmin + " bar</b></br>" +
+                            "Pressure Max: <b>" + feature.properties.Pmax + " bar</b></br>" + "Flow Capacity:<b>" + feature.properties.PipeC20721.toFixed(3) + " mmscfd</b></br>" +
+                            "Flowrate: <b>" + feature.properties.Flow.toFixed(3) + " mmscfd</b></br>" +
+                            "capacity utilization: <b>" + ((Math.abs(feature.properties.Flow) / flow_divider) * 100).toFixed(2) + "%</b>");
+                        //pipeFlowrate.push(feature.properties.PipeC20721);
+                        //pipeDiameters.push(feature.properties.PipeDi2003);
+                    }
+                });
+
+                // Get pipe flow rate maximum and minimum
+                //minPipeFlowrate = Math.min.apply(null, pipeFlowrate);
+                //maxPipeFlowrate = Math.max.apply(null, pipeFlowrate);
+
+                // Get relative utilization (maybe temporary not use )
+                // for (i = 0; i < pipeFlowrate.length; i++) {
+                //     pipeFlowrateRelative[i] = pipeFlowrate[i] / maxPipeFlowrate;
+                // }
+
+
+                //Get max diameter pipe
+                minPipeDiameter = Math.min.apply(null, pipeDiameters);
+                maxPipeDiameter = Math.max.apply(null, pipeDiameters);
+
+                // create classybrew object
+                brewPipeline = new classyBrew();
+                // pass array to our classybrew series
+                //brewPipeline.setSeries(pipeFlowrate);
+                brewPipeline.setSeries(pipeFlowrateRelative);
+                console.log(pipeFlowrateRelative);
+
+                // define number of classes
+                brewPipeline.setNumClasses(selectedPipelineClasses);
+
+
+                // set color ramp code
+                brewPipeline.setColorCode('YlOrRd');
+                // classify by passing in statistical method
+                // i.e. equal_interval, jenks, quantile
+                brewPipeline.classify('quantile');
+
+                // Set range value
+                //pipeValueRange = setRangeValue(minPipeFlowrate, maxPipeFlowrate);
+                // console.log(pipeValueRange);
+
+                // Set style for pipeline
+                var pipelineStyle = function (feature) {
+
+                    var flow_divider = feature.properties.PipeC20721;
+                    // if(feature.properties.PipeC20721 == 0 )
+                    // {
+                    //     flow_divider = 1 ;
+                    // }
+
+                    //var color = getColor(feature.properties.PipeC20721, pipeValueRange);
+
+                    var color = brewPipeline.getColorInRange(Math.abs(feature.properties.Flow) / flow_divider);
+                    var diameter = feature.properties.PipeDi2003 / (2.5 * minPipeDiameter); //2.5 default
+                    return { color: color, weight: diameter, opacity: 0.8 };
+                };
+
+                pipelines.setStyle(pipelineStyle);
+
+                if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                    pipelines.bringToFront();
+                }
+
+                //pipelines.addTo(mymap);
+                //satGroup.addLayer(pipelines);
+                controlLayers.addOverlay(pipelines, "Saturated Map");
+                //map.fitBounds(pipelines.getBounds(), { padding: [50, 50] });
+
+                // Create pipeline legend
+                legendPipelines = L.control({ position: 'bottomright' });
+                legendPipelines.onAdd = function (map) {
+                    var div = L.DomUtil.create('div', 'info  legendPipelines');
+                    //var fromPipeline, toPipeline;
+
+                    percents = brewPipeline.getBreaks();
+                    labelsPipeline = [];
+
+
+                    for (var i = 0; i < percents.length; i++) {
+                        fromPipeline = percents[i];
+                        toPipeline = percents[i + 1];
+                        //console.log("fromPipeline:" + fromPipeline + ";toPipeline:" + toPipeline);
+                        if (toPipeline) {
+                            labelsPipeline.push(
+                                '<i style="background:' + brewPipeline.getColorInRange(toPipeline) + '"></i> ' +
+                                (fromPipeline * 100).toFixed(2) + ' % &ndash;' + (toPipeline * 100).toFixed(2) + ' %');
+                        }
+                    }
+                    //console.log(labelsPipeline);
+                    div.innerHTML = '<strong>Saturation Map</strong> <br><br>' + labelsPipeline.join('<br>');
+                    //console.log(div.innerHTML);
+                    return div;
+                };
+
+            })
+
+            //promiseNodKar.then(function (data) {
+            //})
+        };
+
+
+        // Pipeline map settings
+        //document.getElementById('pipelineWeight').addEventListener('input', function () {
+        //    var wg = parseInt(this.value, 10);
+        //    var st = {};
+        //    st = { weight: wg };
+        //    pipelines.setStyle(st);
+        //});
+
+        document.getElementById('pipelineOpacity').addEventListener('input', function () {
+            var wg = parseFloat(this.value, 10);
+            var st = {};
+            st = { opacity: wg, fillOpacity: wg };
+            pipelines.setStyle(st);
+        });
+
+        // Set color palette of the pipelines
+        function setPipelinePalette(val) {
+            //console.log(isPipelineLayerSelected);
+            if (isPipelineLayerSelected) {
+                /* console.log("palette changed!! " + val);
+                 // set color ramp code
+                 selectedColorPalette = val;
+                 brewPipeline.setColorCode(selectedColorPalette);
+                 // refresh pipeline map */
+                brewPipeline.setColorCode(val)
+                var valueClassify = $("#pipelineClassification").val();
+                var valueNumClass = $("#pipelineClasses").val();
+                brewPipeline.setNumClasses(valueNumClass);
+                brewPipeline.classify(valueClassify);
+                //alert(val + " " + valueClassify + " " + valueNumClass)
+                refreshPipelineMap();
+            }
+            console.log(isPipelineLayerSelected);
+        }
+
+        // Set color classsification
+        function setPipelineClassification(val) {
+            //console.log(isPipelineLayerSelected);
+            if (isPipelineLayerSelected) {
+                /*  console.log("Breaks changed!! " + val);
+                  // set color ramp code
+                 / if (val.toLowerCase() === 'equal')
+                      selectedClassification = 'equal_interval';
+                  else
+                      selectedClassification = val.toLowerCase()
+
+                  // refresh pipeline map*/
+
+                //= brewPipeline.classify(selectedClassification);
+                brewPipeline.classify(val);
+                //console.log(br);
+                //debugger;
+                var valueColor = $("#pipelinePalette").val();
+                var valueNumClass = $("#pipelineClasses").val();
+                brewPipeline.setNumClasses(valueNumClass);
+                brewPipeline.setColorCode(valueColor);
+                //alert(val + " " + valueColor + " " + valueNumClass)
+
+                refreshPipelineMap();
+            }
+        }
+
+        function setPipelineClasses(val) {
+            //console.log(isPipelineLayerSelected);
+            if (isPipelineLayerSelected) {
+                console.log("classes changed!! " + val);
+                // set color ramp code
+                brewPipeline.setNumClasses(val);
+                var valueColor = $("#pipelinePalette").val();
+                var valueClassify = $("#pipelineClassification").val();
+                brewPipeline.setColorCode(valueColor);
+                brewPipeline.classify(valueClassify);
+                //alert(val + " " + valueColor + " " + valueClassify)
+                //console.log(br);
+                // refresh pipeline map
+                refreshPipelineMap();
+            }
+
+        }
+
+        function refreshPipelineMap() {
+
+
+            var st = function (feature) {
+                //var color = getColor(feature.properties.PipeC20721, pipeValueRange);
+                var color = brewPipeline.getColorInRange(Math.abs(feature.properties.Flow) / feature.properties.PipeC20721);
+                var diameter = feature.properties.PipeDi2003 / (2.5 * minPipeDiameter); //2.5 default
+                return { color: color, weight: diameter, opacity: 0.8 };
+            };
+
+            //var st = function (feature) {
+            //    var color = getColor(feature.properties.PipeC20721, pipeValueRange);
+            //    var color = brewPipeline.getColorInRange(feature.properties.PipeC20721 / maxPipeFlowrate);
+            //    return { color: color };
+            //};
+            pipelines.setStyle(st);
+            legendPipelines.remove();
+            legendPipelines.addTo(map);
+        }
+
+        function drawNodeKarawang() {
+            var promiseNodKar = $.getJSON(url_api_overview_map4);
+            var nodeCapaUtili = [];
+            var dumynode1 = [];
+            var dumynode2 = [];
+          //  debugger;
+            var tesnode = [];
+            var DummyColor1 = { min: 0, max: 0.03, color: '#db0202' }; //merah
+            var DummyColor2 = { min: 0.03, max: 0.5, color: '#008000' }; //hijau
+            var DummyColor3 = { min: 0.5, max: 0.7, color: '#0000a0' }; //biru
+            var DummyColor4 = { min: 0.8, max: 50, color: '#ffff00' }; //kuning
+
+            var allColor = [DummyColor1, DummyColor2, DummyColor3, DummyColor4];
+
+            promiseNodKar.then(function (data) {
+
+                // var geojsonMarkerOptions = {
+                //     radius: 4,
+                //     fillColor: "#ff7800", //#ff7800
+                //     color: "#000",
+                //     weight: 1,
+                //     opacity: 1,
+                //     fillOpacity: 0.8
+                // };
+
+                // nodekar = L.geoJSON(data, {
+                //    pointToLayer: function (feature, latlng) {
+                //        return L.circleMarker(latlng, geojsonMarkerOptions);
+                //    },
+                // default setting geojsonmarkeroptions
+                L.geoJson(data, {
+
+
+                    onEachFeature: function (feature, layer) {
+
+                        // if(feature.properties.MaxLoad != 0)
+                        // {
+                        //     var loadNode = ((feature.properties.Flowrate/feature.properties.MaxLoad)*100).toFixed(4);
+                        var NodeCapacityUti = feature.properties.Flowrate / feature.properties.MaxLoad;
+
+                        dumynode1.push(feature.properties.Flowrate);
+                        dumynode2.push(feature.properties.MaxLoad);
+
+                        if (NodeCapacityUti == Infinity) {
+                            NodeCapacityUti = 1;
+
+                        }
+
+                        if (isNaN(NodeCapacityUti)) {
+                            NodeCapacityUti = 0;
+                        }
+
+
+                        nodeCapaUtili.push(NodeCapacityUti);
+                    }
+                });
+
+                console.log(dumynode1);
+                console.log(dumynode2);
+                console.log(nodeCapaUtili);
+                brewNode = new classyBrew();
+                // pass array to our classybrew series
+                //brewPipeline.setSeries(pipeFlowrate);
+                brewNode.setSeries(nodeCapaUtili);
+
+                // define number of classes
+                brewNode.setNumClasses(4);
+
+
+                // set color ramp code
+                brewNode.setColorCode('YlOrRd');
+                // classify by passing in statistical method
+                // i.e. equal_interval, jenks, quantile
+                brewNode.classify('quantile');
+
+
+
+                nodekar = L.geoJSON(data, {
+                    pointToLayer: function (feature, latlng) {
+                        // var color1 = brewNode.getColorInRange(feature.properties.Flowrate);
+                        return L.circleMarker(latlng, {
+                            radius: 4,
+                            weight: 1.5,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        });
+                    },
+
+                    onEachFeature: function (feature, layer) {
+                        tesnode.push(feature.properties.NodeFlo491);
+
+                        layer.bindPopup("IDREFPELANGGAN: <b>" + feature.properties.IDRefPelanggan + "</b></br>Area Name:<b>" + feature.properties.AreaName + "</b></br>Name:<b>" + feature.properties.Name + "</b></br>FlowRate:<b>" + (feature.properties.Flowrate).toFixed(4) + " mmscfd</b></br>" + "MaxLoad: <b>" + (feature.properties.MaxLoad).toFixed(4) + " bar</b></br>" + "capacity Utilization: <b>" + ((feature.properties.Flowrate / feature.properties.MaxLoad) * 100).toFixed(4) + " %</b></br>");
+
+                    }
+                });
+
+                // nodekar.setStyle({fillColor:"red", color: "#000" });
+
+                var nodeStyle = function (feature) {
+
+                    var NodeCapacityUti = feature.properties.Flowrate / feature.properties.MaxLoad;
+
+                    if (NodeCapacityUti == Infinity) {
+                        NodeCapacityUti = 1;
+
+                    }
+
+                    if (isNaN(NodeCapacityUti)) {
+                        NodeCapacityUti = 0;
+                    }
+
+
+
+                    var color1 = brewNode.getColorInRange(NodeCapacityUti);
+
+                    return { fillColor: color1, color: "#000" };
+                };
+
+                nodekar.setStyle(nodeStyle);
+
+                //satGroup.addLayer(nodekar);
+                // nodekar.addTo(map);
+                controlLayers.addOverlay(nodekar, "Node Map");
+
+                // for legend manual later
+                // legendNode = L.control({ position: 'bottomright' });
+                //  legendNode.onAdd = function (map) {
+                //                 var div = L.DomUtil.create('div', 'info  legendPipelines');
+                //                 //var fromPipeline, toPipeline;
+
+                //                 labelsNode = [];
+                //                 for (var i = 0; i < allColor.length; i++) {
+                //                     fromPipeline = allColor[i].min;
+                //                     toPipeline = allColor[i].max;
+                //                     Colour =allColor[i].color;
+                //                     //console.log("fromPipeline:" + fromPipeline + ";toPipeline:" + toPipeline);
+                //                     if (toPipeline) {
+                //                         labelsNode.push(
+                //                             '<i style="background:'+allColor[i].color+'"></i>'+
+                //                             fromPipeline.toFixed(2) + ' -&ndash;' + toPipeline.toFixed(2) + " ");
+                //                     }
+                //                 }
+                //                 //console.log(labelsPipeline);
+                //                 div.innerHTML = '<strong>Node</strong> <br><br>' + labelsNode.join('<br>');
+                //                 //console.log(div.innerHTML);
+                //                 return div;
+                //             };
+
+                legendNode = L.control({ position: 'bottomright' });
+                legendNode.onAdd = function (map) {
+                    var div = L.DomUtil.create('div', 'info  legendPipelines');
+                    //var fromPipeline, toPipeline;
+                    var percentsnode = brewNode.getBreaks();
+                    labelsNode = [];
+                    for (var i = 0; i < percentsnode.length; i++) {
+                        var fromNode = percentsnode[i];
+                        var toNode = percentsnode[i + 1];
+                        //console.log("fromPipeline:" + fromPipeline + ";toPipeline:" + toPipeline);
+                        if (toNode) {
+                            labelsNode.push(
+                                '<i style="background:' + brewNode.getColorInRange(toNode) + '"></i> ' +
+                                (fromNode * 100).toFixed(2) + ' % &ndash;' + (toNode * 100).toFixed(2) + ' %');
+                        }
+                    }
+                    //console.log(labelsPipeline);
+                    div.innerHTML = '<strong>Node Map</strong> <br><br>' + labelsNode.join('<br>');
+                    //console.log(div.innerHTML);
+                    return div;
+                };
+
+
+
+
+
+
+
+
+            })
+
+
+
+        }
+
+        document.getElementById('NodeOpacity').addEventListener('input', function () {
+            var wn = parseFloat(this.value, 10);
+            var stn = {};
+            stn = { opacity: wn, fillOpacity: wn };
+            nodekar.setStyle(stn);
+        });
+
+        // Set color palette of the nodes
+        function setNodePalette(val) {
+
+            if (isNodeSelected) {
+
+                brewNode.setColorCode(val)
+                var valueClassify = $("#NodeClassification").val();
+                var valueNumClass = $("#NodeClasses").val();
+                brewNode.setNumClasses(valueNumClass);
+                brewNode.classify(valueClassify);
+
+                refreshNode();
+            }
+
+        }
+
+        // Set color classsification nodes
+        function setNodeClassification(val) {
+
+            if (isNodeSelected) {
+
+                brewNode.classify(val);
+
+                var valueColor = $("#NodePalette").val();
+                var valueNumClass = $("#NodeClasses").val();
+                brewNode.setNumClasses(valueNumClass);
+                brewNode.setColorCode(valueColor);
+
+
+                refreshNode();
+            }
+        }
+
+        function setNodeClasses(val) {
+
+            if (isNodeSelected) {
+
+                // set color ramp code nodes
+                brewNode.setNumClasses(val);
+                var valueColor = $("#NodePalette").val();
+                var valueClassify = $("#NodeClassification").val();
+                brewNode.setColorCode(valueColor);
+                brewNode.classify(valueClassify);
+
+                refreshNode();
+            }
+
+        }
+
+        function refreshNode() {
+
+
+            var st = function (feature) {
+                //var color = getColor(feature.properties.PipeC20721, pipeValueRange);
+                var NodeCapacityUti = feature.properties.Flowrate / feature.properties.MaxLoad;
+
+                if (NodeCapacityUti == Infinity) {
+                    NodeCapacityUti = 1;
+
+                }
+
+                if (isNaN(NodeCapacityUti)) {
+                    NodeCapacityUti = 0;
+                }
+                var color1 = brewNode.getColorInRange(NodeCapacityUti);
+
+                return { fillColor: color1, color: "#000" };
+            };
+
+
+            nodekar.setStyle(st);
+            legendNode.remove();
+            legendNode.addTo(map);
+        }
+
+
+        function coloringNode(data_Dummy) {
+            if (data_Dummy > 0 && data_Dummy <= 0.58) {
+                return "#db0202";
+            }
+            else if (data_Dummy > 0.58 && data_Dummy <= 1.22) {
+                return "#008000";
+            }
+            else if (data_Dummy > 1.22 && data_Dummy <= 5.60) {
+                return "#0000a0";
+            }
+            else if (data_Dummy > 5.60 && data_Dummy <= 100) {
+                return "#ffff00";
+            }
+            else {
+                return "black";
+            }
+           // debugger;
+        }
+
+        // function draw line competitor pipeline
+        function competitorPipeline() {
+            var promiseCompePipe = $.getJSON(url_api_overview_map5);
+            var DiameterCompePipe = [];
+
+            promiseCompePipe.then(function (data) {
+
+                L.geoJson(data, {
+                    onEachFeature: function (feature, layer) {
+                        DiameterCompePipe.push(feature.properties.Diameter);
+                    }
+                });
+
+                var minDiameterComperPipe = Math.min.apply(null, DiameterCompePipe);
+                var compePipeOptions = {
+                    fillColor: "#ff7800",
+                    color: "#000",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                };
+
+                compePipeline = L.geoJSON(data, {
+                    //content form compePipeline
+                });
+                var compePipeStyle = function (feature) {
+                    //var color = getColor(feature.properties.PipeC20721, pipeValueRange);
+                    var color = "black";
+                    var diameter = (feature.properties.Diameter / (2.5 * minDiameterComperPipe)) * 2;
+                    return { color: color, weight: diameter, opacity: 0.8 };
+                };
+
+                compePipeline.setStyle(compePipeStyle);
+                controlLayers.addOverlay(compePipeline, "Competitor Pipeline");
+            });
+        }
+        //function for change setting choice
+        function setSettingChoice(val) {
+
+
+            if (val == "Manual") {
+
+                $("#content-Setting").hide();
+
+
+                // if(isPipelineLayerSelected === true)
+                // {
+
+                //     map.removeLayer(nodekar);
+                // }
+                // if(isPipelineLayerManualSelected === true)
+                //  {
+                //      map.removeLayer(compePipeline);
+
+                //  }
+                if (isPipelineLayerSelected === true) {
+                    map.removeLayer(nodekar);
+                    map.removeLayer(pipelines);
+                    legendPipelines.remove();
+
+                }
+
+                if (isNodeSelected === true) {
+                    map.removeLayer(nodekar);
+                    legendNode.remove();
+
+                }
+
+                controlLayers.removeLayer(pipelines);
+                controlLayers.removeLayer(nodekar);
+
+                controlLayers.addOverlay(line_karawang, "Saturated Map Manual");
+                controlLayers.addOverlay(nodekarManual, "Node Map Manual");
+
+
+            }
+            if (val == "Automatic") {
+
+                $("#content-Setting").show();
+
+                //  if(isPipelineLayerManualSelected === true)
+                // {
+                //     legendPipekar.remove();
+                //     map.removeLayer(line_karawang);
+                //     map.removeLayer(nodekar);
+                // }
+                if (isPipelineLayerManualSelected === true) {
+                    map.removeLayer(nodekar);
+                    map.removeLayer(line_karawang);
+                    legendPipekar.remove();
+
+                }
+
+                if (isNodeSelectedManual === true) {
+                    map.removeLayer(nodekarManual);
+                    legendNodeManual.remove();
+                }
+                controlLayers.removeLayer(line_karawang);
+                controlLayers.removeLayer(nodekarManual);
+                controlLayers.addOverlay(pipelines, "Saturated Map");
+                controlLayers.addOverlay(nodekar, "Node Map");
+
+            }
+        }
+        ///make range color test ///
+
+        function getColorLineManual(data_setting, val) {
+
+            var d;
+
+            for (var i = 0; i < data_setting.length; i++) {
+
+                if (val >= data_setting[i].min && val <= data_setting[i].max) {
+                    d = data_setting[i].color;
+
+                }
+            }
+
+            return d;
+
+        }
+
+        function getColorNodeManual(data_setting, val) {
+
+            var d;
+
+            for (var i = 0; i < data_setting.length; i++) {
+
+                if (val > data_setting[i].min.toFixed(2) && val <= data_setting[i].max.toFixed(2)) {
+                    d = data_setting[i].color;
+                    tesvaldummy.push(val);
+                   // debugger;
+                }
+
+                // else
+                // {
+                //     d ="black";
+                // }
+            }
+
+            console.log(tesvaldummy);
+            return d;
+
+        }
+
+        // draw pipeline use coloring from setting manual
+
+        function drawLineManual() {
+            $.ajax({
+                type: "Get",
+                url: url_api_set_overview + "/GetKarSettSaturation",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+
+                    for (var i = 0; i < Object.keys(data).length; i++) {
+                        var val = { min: data[i].MIN, max: data[i].MAX, color: data[i].COLOUR };
+                        data_setting.push(val);
+
+                    }
+
+                    var promise1 = $.getJSON(url_api_overview_map2);
+                    promise1.then(function (data) {
+
+                        line_karawang = L.geoJson(data, {
+                            //style: pipelineStyle,
+                            onEachFeature: function (feature, layer) {
+                                var flow_divider = feature.properties.PipeC20721;
+                                // if(feature.properties.PipeC20721 == 0 )
+                                // {
+                                //     flow_divider = 1 ;
+                                // }
+                                layer.bindPopup("Facility: <b>" + feature.properties.FacNam1005 + "</b></br>" +
+                                    "Diameter: <b>" + (feature.properties.PipeDi2003).toFixed(4) + "in</b></br>" +
+                                    "Pressure Min: <b>" + feature.properties.Pmin + " bar</b></br>" +
+                                    "Pressure Max: <b>" + feature.properties.Pmax + " bar</b></br>" + "Flow Capacity:<b>" + feature.properties.PipeC20721.toFixed(3) + " mmscfd</b></br>" +
+                                    "Flowrate: <b>" + feature.properties.Flow.toFixed(3) + " mmscfd</b></br>" +
+                                    "capacity utilization: <b>" + ((Math.abs(feature.properties.Flow) / flow_divider) * 100).toFixed(2) + "%</b>");
+                                //pipeFlowrate.push(feature.properties.PipeC20721);
+                                //pipeDiameters.push(feature.properties.PipeDi2003);
+                            }
+                        });
+
+                        var karapipeStyle = function (feature) {
+                            //var color = getColor(feature.properties.PipeC20721, pipeValueRange);
+                            var flow_divider = feature.properties.PipeC20721;
+                            // if(feature.properties.PipeC20721 == 0 )
+                            // {
+                            //     flow_divider = 1 ;
+                            // }
+                            var color = getColorLineManual(data_setting, (Math.abs(feature.properties.Flow) / flow_divider) * 100);
+                            var diameter = feature.properties.PipeDi2003 / (2.5 * minPipeDiameter);
+                            return { color: color, weight: diameter, opacity: 0.8 };
+                        };
+
+                        line_karawang.setStyle(karapipeStyle);
+                        // line_karawang.addTo(map);
+                        var auto = $('#settingChoice').val();
+
+                        controlLayers.addOverlay(line_karawang, "Saturated Map Manual");
+                        // drawNodeKarawang();
+
+                        if (auto == "Automatic") {
+                            controlLayers.removeLayer(line_karawang);
+                        }
+                        //legend karawang test //
+
+                        legendPipekar = L.control({ position: 'bottomright' });
+                        legendPipekar.onAdd = function (map) {
+                            var div = L.DomUtil.create('div', 'info  legendPipelines manual');
+                            //var fromPipeline, toPipeline;
+
+                            labelsPipelinekar = [];
+                            for (var i = 0; i < data_setting.length; i++) {
+                                fromPipeline = data_setting[i].min;
+                                toPipeline = data_setting[i].max;
+                                //console.log("fromPipeline:" + fromPipeline + ";toPipeline:" + toPipeline);
+                                if (toPipeline) {
+                                    labelsPipelinekar.push(
+                                        '<i style="background:' + data_setting[i].color + '"></i> ' +
+                                        fromPipeline.toFixed(2) + '%-&ndash;' + toPipeline.toFixed(2) + "%");
+                                }
+                            }
+                            //console.log(labelsPipeline);
+                            div.innerHTML = '<strong>Saturation Map</strong> <br><br>' + labelsPipelinekar.join('<br>');
+                            //console.log(div.innerHTML);
+                            return div;
+                        };
+
+                        // legendPipekar.addTo(map);
+                    });
+
+
+                }
+            });
+        }
+
+
+        function drawNodeManual() {
+            var nodeCapaUtili = [];
+            $.ajax({
+                type: "Get",
+                url: url_api_set_overview + "/GetKarSettNode",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+
+                    for (var i = 0; i < Object.keys(data).length; i++) {
+                        var val = { min: data[i].MIN, max: data[i].MAX, color: data[i].COLOUR };
+                        data_settingNode.push(val);
+
+                    }
+
+
+                    var promiseNodeManual = $.getJSON(url_api_overview_map4);
+                    promiseNodeManual.then(function (data) {
+
+                        L.geoJson(data, {
+                            onEachFeature: function (feature, layer) {
+                                var NodeCapacityUti = feature.properties.Flowrate / feature.properties.MaxLoad;
+
+                                if (NodeCapacityUti == Infinity) {
+                                    NodeCapacityUti = 1;
+
+                                }
+
+                                if (isNaN(NodeCapacityUti)) { NodeCapacityUti = 0; }
+
+
+                                nodeCapaUtili.push(NodeCapacityUti);
+                            }
+                        });
+
+
+                        nodekarManual = L.geoJSON(data, {
+                            pointToLayer: function (feature, latlng) {
+                                // var color1 = brewNode.getColorInRange(feature.properties.Flowrate);
+                                return L.circleMarker(latlng, {
+                                    radius: 4,
+                                    weight: 1.5,
+                                    opacity: 1,
+                                    fillOpacity: 0.8
+                                });
+                            },
+
+                            onEachFeature: function (feature, layer) {
+
+                                layer.bindPopup("IDREFPELANGGAN: <b>" + feature.properties.IDRefPelanggan + "</b></br>Area Name:<b>" + feature.properties.AreaName + "</b></br>Name:<b>" + feature.properties.Name + "</b></br>FlowRate:<b>" + (feature.properties.Flowrate).toFixed(4) + " mmscfd</b></br>" + "MaxLoad: <b>" + (feature.properties.MaxLoad).toFixed(4) + " bar</b></br>" + "capacity Utilization: <b>" + ((feature.properties.Flowrate / feature.properties.MaxLoad) * 100).toFixed(4) + " %</b></br>");
+
+                            }
+                        });
+
+
+                        var nodeManualStyle = function (feature) {
+
+                            var NodeCapacityUti = feature.properties.Flowrate / feature.properties.MaxLoad;
+
+                            if (NodeCapacityUti == Infinity) {
+                                NodeCapacityUti = 1;
+
+                            }
+
+                            if (isNaN(NodeCapacityUti)) {
+                                NodeCapacityUti = 0;
+                            }
+
+                            // var color1 = getColorNodeManual(data_settingNode,NodeCapacityUti.toFixed(2));
+                            var color1 = getColorNodeManual(data_settingNode, NodeCapacityUti * 100);
+                            return { fillColor: color1, color: "#000" };
+                        };
+
+                        var auto = $('#settingChoice').val();
+                        nodekarManual.setStyle(nodeManualStyle);
+                        controlLayers.addOverlay(nodekarManual, "Node Map Manual");
+
+                        if (auto == "Automatic") {
+                            controlLayers.removeLayer(nodekarManual);
+                        }
+
+
+
+                        legendNodeManual = L.control({ position: 'bottomright' });
+                        legendNodeManual.onAdd = function (map) {
+                            var div = L.DomUtil.create('div', 'info  legendPipelines');
+                            //var fromPipeline, toPipeline;
+
+                            labelsNodeManual = [];
+                            for (var i = 0; i < data_settingNode.length; i++) {
+                                fromPipeline = data_settingNode[i].min;
+                                toPipeline = data_settingNode[i].max;
+                                //console.log("fromPipeline:" + fromPipeline + ";toPipeline:" + toPipeline);
+                                if (toPipeline) {
+                                    labelsNodeManual.push(
+                                        '<i style="background:' + data_settingNode[i].color + '"></i> ' +
+                                        fromPipeline.toFixed(2) + '%-&ndash;' + toPipeline.toFixed(2) + "%");
+                                }
+                            }
+                            //console.log(labelsPipeline);
+                            div.innerHTML = '<strong>Node Map</strong> <br><br>' + labelsNodeManual.join('<br>');
+                            //console.log(div.innerHTML);
+                            return div;
+                        };
+
+                    });
+                }
+            });
+
+        }
+
+
+
+
+
+
+    </script>
+    <!-- <script src="scripts/overview.js"></script> -->
+
+</body>
+</html>

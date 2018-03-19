@@ -1,0 +1,423 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Themeforest.cshtml";
+}
+<style>
+    #show1 {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        text-align: right;
+        background: url("https://www.creditmutuel.fr/cmne/fr/banques/webservices/nswr/images/loading.gif") no-repeat center center rgba(0,0,0,0.25);
+    }
+
+    div.bar {
+        display: inline-block;
+        width: 15px;
+        height: 250px;
+        background-color: teal;
+        margin-bottom: 0px;
+        margin-right: 1px;
+        margin-bottom: 0px;
+    }
+
+    .svg-container {
+        display: inline-block;
+        position: relative;
+        width: 100%;
+        padding-bottom: 100%; /* aspect ratio */
+        vertical-align: top;
+        overflow: hidden;
+    }
+
+    .svg-content-responsive {
+        display: inline-block;
+        position: absolute;
+        top: 10px;
+        left: 0;
+    }
+
+    #heatMapBarChart1 {
+        float: left;
+        margin-top: 9%;
+        max-height: 300px;
+        margin-left: 15%;
+    }
+
+    #map5 {
+        margin-left: 5%;
+        margin: 2%;
+        padding: 20px;
+    }
+
+
+
+    tbody {
+        margin-left: 10px;
+    }
+
+    rect.bordered {
+        stroke: #E6E6E6;
+        stroke-width: 1px;
+    }
+
+    text.mono {
+        font-size: 9pt;
+        font-family: Consolas, courier;
+        fill: #aaa;
+    }
+
+    text.axis-workweek {
+        fill: #000;
+    }
+
+    text.axis-worktime {
+        fill: #000;
+    }
+
+    .legend tr {
+        border-bottom: 1px solid grey;
+    }
+
+        .legend tr:first-child {
+            border-top: 1px solid grey;
+        }
+
+    .legend {
+        margin-bottom: 35px;
+        display: inline-block;
+        border-collapse: collapse;
+        border-spacing: 0px;
+    }
+
+        .legend td {
+            padding: 4px 5px;
+            vertical-align: bottom;
+        }
+
+    .legendFreq, .legendPerc {
+        align: bottom;
+        width: 50px;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .bar {
+        fill: orange;
+    }
+
+    .solidArc:hover {
+        fill: orangered;
+    }
+
+    .solidArc {
+        -moz-transition: all 0.3s;
+        -o-transition: all 0.3s;
+        -webkit-transition: all 0.3s;
+        transition: all 0.3s;
+    }
+
+    .x.axis path {
+        display: none;
+    }
+
+    .aster-score {
+        line-height: 1;
+        font-weight: bold;
+        font-size: 30px;
+    }
+
+    .d3-tip {
+        line-height: 1;
+        font-weight: bold;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        border-radius: 2px;
+    }
+
+
+        .d3-tip:after {
+            box-sizing: border-box;
+            display: inline;
+            font-size: 10px;
+            width: 100%;
+            line-height: 1;
+            color: rgba(0, 0, 0, 0.8);
+            content: "\25BC";
+            position: absolute;
+            text-align: center;
+        }
+
+        .d3-tip.n:after {
+            margin: -1px 0 0 0;
+            top: 100%;
+            left: 0;
+        }
+
+    .yaxis {
+        fill: #808080;
+        font-size: 13px;
+    }
+
+    .warna {
+        background-color: #4CAF50;
+        color: orange;
+    }
+
+    .modal1 {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* make column header devextreme center*/
+    td[role="columnheader"]div {
+        text-align: center;
+    }
+
+    /* Modal Content */
+    .modal-content1 {
+        background-color: #fefefe;
+        margin: auto;
+        margin-top: -80px;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+
+    /* The Close Button */
+    .close1 {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close1:hover,
+        .close1:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+
+    #show_data_demand {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999; /*9999 default*/
+        text-align: right;
+        background: url("https://www.creditmutuel.fr/cmne/fr/banques/webservices/nswr/images/loading.gif") no-repeat center center rgba(0,0,0,0.25);
+    }
+</style>
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<script src="@Url.Content("~/Scripts")/d3/jquery.min.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts")/d3/moment.min.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts")/d3/daterangepicker.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts")/d3/d3.v3.min.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts")/d3/d3.tip.v0.6.3.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts")/d3/topojson.v1.min.js" type="text/javascript"></script>
+
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+<script src="@Url.Content("~/Scripts")/table2CSV.js" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts")/Dashboard.js" type="text/javascript"></script>
+
+
+
+<div class="page-content-wrapper">
+    <div class="page-content" style="margin-left:200px;">
+        <div class="page-bar" @*style="padding-bottom: -200px;"*@>
+            <div style="float:left; margin-top:5px">
+                <h4><strong> DKI Jakarta</strong></h4>
+                <h5 id="noKota" style="display:none">011</h5>
+            </div>
+
+
+            <div class="page-toolbar">
+
+
+                <div id="dashboard-report-range" class="pull-right tooltips btn btn-sm" data-container="body" data-placement="bottom" data-original-title="Change dashboard date range">
+                    <i class="icon-calendar"></i>&nbsp;
+                    <span class="thin uppercase hidden-xs"></span>&nbsp;
+                    <i class="fa fa-angle-down"></i>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row" style="height:100%;margin-left:-20px;margin-right:-20px;">
+
+            <div class="table" style="max-width:1100px">
+                <div class=" col-lg-7 col-xs-6 col-sm-6" style="/*background-color:aliceblue;*/padding:15px;height:100%;" id="lblValue">
+
+                    <div id="show_data_demand" style="display:none"></div>
+                    <h3 style="color:black;font-size:12px;position:absolute;margin-top:-12px;"></h3>
+                    <svg id="map5" style="left:0;"></svg>
+                    @*<div id="area" style="position: absolute; top: 0; left:200px;">*@
+
+                    @*</div>*@
+
+                    <div id="labelheat"></div>
+                    <svg id="heatMapChart1">
+
+                    </svg>
+
+
+                </div>
+                <div class="col-lg-5 col-xs-6 col-sm-6" style="background-color:#FFFFFF;height:100%;">
+
+                    <div>
+                        <span id="titleAU">  <strong>Capacity Utilization</strong></span>
+                        <div id="PieChart1"></div>
+                    </div>
+
+                    <div>
+                        <span id="titleFP" style="position:absolute;"> <strong>Flow Profile</strong></span>
+                        <svg id="graphic" style="margin-top:10px;position:absolute;"></svg>@*margin-top:-25px;*@
+                    </div>
+
+
+
+                    <div id="heatMapBarChart2" style="margin-top:180px;position:relative;margin-left:-20px;">
+                        <div id="labelselected" style="padding:0px; margin-bottom:-300px;"></div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div id="myModal1" class="modal1">
+
+                <!-- Modal content -->
+                <div class="modal-content1">
+                    <span id="title" style="background-color:#4CAF50;width:100%"></span>
+                    <div id="gridContainer">
+                    </div><br>
+                    <button id="myClose1" class="btn blue">Close</button>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+
+
+<script>
+
+    // $(document).ready(function(){
+    //     // $("input[name*='nation']").css("background-color", "yellow");
+    //     // $("td[role='columnheader']").css({ text-align: "center" });
+    //   $("[role='columnheader']").css({ "text-align" , "center" });
+    //   $("[role='columnheader']").css("background-color", "yellow");
+    // });
+
+    // $('#testh').click(function() {
+    //     alert("Hello");
+    //      // $("[role='columnheader']").css({ "text-align" , "center" });
+    //      $("td[role='columnheader']").css("background-color", "yellow");
+    // });
+
+
+    $(window).on("resize", function () {
+
+        //for heatmap
+        $("#heatMapChart1").attr("width", targetWidth);
+
+        var width_heat = Math.min(parseInt(d3.select("#heatMapChart1").style("width")));
+        var height_heat = Math.min(parseInt(d3.select("#heatMapChart1").style("height")));
+
+        var aspect = width_heat / height_heat;
+        var container = $("#heatMapChart1").parent();
+        var targetWidth = container.width();
+        $("#heatMapChart1").attr("width", targetWidth);
+        $("#heatMapChart1").attr("height", Math.round(targetWidth / aspect));
+
+
+        // var width_map = Math.min(parseInt(d3.select("#map5").style("width")));
+        // var height_map = Math.min(parseInt(d3.select("#map5").style("height")));
+        // var aspect_map = width_map / height_map;
+
+        // var container_map = $("#map5").parent();
+        // var targetWidthMap = container_map.width();
+        // $("#map5").attr("width", targetWidthMap);
+        // $("#map5").attr("height", Math.round(targetWidthMap / aspect_map));
+
+
+
+        //for bar
+        var widthbar = Math.min(parseInt(d3.select("#heatjoinbar").style("width")));
+        var heightbar = Math.min(parseInt(d3.select("#heatjoinbar").style("height")));
+        aspectbar = widthbar / heightbar,
+        containerbar = $("#heatjoinbar").parent();
+
+        var targetWidthbar = containerbar.width();
+        $("#heatjoinbar").attr("width", targetWidthbar);
+        $("#heatjoinbar").attr("height", Math.round(targetWidthbar / aspectbar));
+
+
+        //for pie
+        var width_pie = Math.min(parseInt(d3.select("#PieChart1").style("width")));
+        var height_pie = Math.min(parseInt(d3.select("#PieChart1").style("height")));
+        var aspect_pie = width_pie / height_pie;
+
+
+        var container_pie = $("#PieChart1").parent();
+        var targetWidthPie = container_pie.width();
+        $("#PieChart1").attr("width", targetWidthPie);
+        $("#PieChart1").attr("height", Math.round(targetWidthPie / aspect_pie));
+
+
+        //for graphic
+        var width_graphic = Math.min(parseInt(d3.select("#graphic").style("width")));
+        var height_graphic = Math.min(parseInt(d3.select("#graphic").style("height")));
+        var aspect_graphic = width_graphic / height_graphic;
+
+        var container_graphic = $("#graphic").parent();
+        var targetWidthgraphic = container_graphic.width();
+        $("#graphic").attr("width", targetWidthgraphic);
+        $("#graphic").attr("height", Math.round(targetWidthgraphic / aspect_graphic));
+
+
+    }).trigger("resize");
+
+    // function Login1()
+    // {
+    //           $('#show1').show();
+    //        //    debugger;
+    //        // setTimeout(function () {
+    //        //     $('#show1').hide();
+    //        // }, 2000);
+    //        // alert("tes");
+    // }
+
+</script>
